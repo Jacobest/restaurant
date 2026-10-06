@@ -27,5 +27,6 @@
   <p class="lead">Patients book, change or cancel a visit in chat and get reminders before the appointment.</p>
   <div class="soon">The demos for this use case are coming soon.</div>
 </main>
+<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(d.role==="owner"){const n=document.querySelector("header a[href=\"/logout\"]");if(n)n.insertAdjacentHTML("beforebegin","<a href=\"/admin/\">Admin</a>")}})</script>
 </body>
 </html>

@@ -1,19 +1,24 @@
-// Gate every page except the login page behind a password cookie.
-export async function token(password) {
-  const data = new TextEncoder().encode('whatsapp-demo:' + password);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
+// Gate every page behind a login, except the few public pages below.
+import { getSession } from './_auth.js';
+
+const PUBLIC = new Set([
+  '/login', '/logout', '/invite', '/api/accept-invite', '/api/me',
+  '/uc/restaurant-booking/chat', '/uc/restaurant-booking/chat.html',
+]);
 
 export async function onRequest({ request, env, next }) {
   const url = new URL(request.url);
-  if (url.pathname === '/login' || url.pathname === '/logout') return next();
+  const path = url.pathname.length > 1 ? url.pathname.replace(/\/$/, '') : url.pathname;
+  if (PUBLIC.has(path)) return next();
 
-  const expected = env.DEMO_PASSWORD ? await token(env.DEMO_PASSWORD) : null;
-  const cookie = request.headers.get('Cookie') || '';
-  const ok = expected && cookie.split(/;\s*/).includes('demo_auth=' + expected);
+  const session = await getSession(request, env);
 
-  if (url.pathname === '/') return ok ? Response.redirect(url.origin + '/uc/', 302) : next();
-  if (ok) return next();
-  return Response.redirect(url.origin + '/', 302);
+  if (path === '/') return session ? Response.redirect(url.origin + '/uc/', 302) : next();
+  if (!session) {
+    return path.startsWith('/api/') ? new Response('Unauthorized', { status: 401 }) : Response.redirect(url.origin + '/', 302);
+  }
+  if ((path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/')) && session.role !== 'owner') {
+    return Response.redirect(url.origin + '/uc/', 302);
+  }
+  return next();
 }

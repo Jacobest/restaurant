@@ -57,6 +57,7 @@
 <body>
 <header><b>Engage<span>ONE</span></b><span><a href="/uc/restaurant-booking/">Back</a><a href="/logout">Sign out</a></span></header>
 <div id="root"></div>
+<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(!d.role)document.querySelector("header span").remove()}).catch(()=>{})</script>
 <script>
 const SERIF = "'Cormorant Garamond',Georgia,serif";
 function buildPhones() {

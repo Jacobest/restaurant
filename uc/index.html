@@ -63,5 +63,6 @@
 
   </div>
 </main>
+<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(d.role==="owner"){const n=document.querySelector("header a[href=\"/logout\"]");if(n)n.insertAdjacentHTML("beforebegin","<a href=\"/admin/\">Admin</a>")}})</script>
 </body>
 </html>
