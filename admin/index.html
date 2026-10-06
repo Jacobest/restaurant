@@ -27,10 +27,20 @@
   .link{margin-top:14px;padding:12px;border-radius:8px;background:#D9FDD3;font-size:14px;word-break:break-all}
   .link button{margin-top:8px}
   .err{color:#b3261e;font-size:14px;margin-top:10px}
+  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2}
+  .crumbs[hidden]{display:none}
+  .crumbs a{color:#075E54;text-decoration:none}
+  .crumbs a:hover{text-decoration:underline}
+  .crumbs .back{background:#075E54;color:#fff;padding:8px 14px;border-radius:99px;font-size:15px;margin-right:6px}
+  .crumbs .back:hover{background:#128C7E;text-decoration:none}
+  .crumbs .sep{color:#8aa39b;font-weight:400}
+  .crumbs .cur{color:#111B21}
+  @media (max-width:600px){.crumbs{padding:12px 16px;font-size:16px}}
 </style>
 </head>
 <body>
 <header><b>Engage<span>ONE</span></b><span><a href="/uc/">Use cases</a><a href="/logout">Sign out</a></span></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <span class="cur">Admin</span></nav>
 <main>
   <h1>Admin</h1>
   <p class="sub">Invite your team so they can run the demos.</p>

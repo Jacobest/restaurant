@@ -25,10 +25,20 @@
   .tag{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:#D9FDD3;color:#075E54}
   .tag.soon{background:#eceff0;color:#667781}
   .card.off{opacity:.8}
+  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2}
+  .crumbs[hidden]{display:none}
+  .crumbs a{color:#075E54;text-decoration:none}
+  .crumbs a:hover{text-decoration:underline}
+  .crumbs .back{background:#075E54;color:#fff;padding:8px 14px;border-radius:99px;font-size:15px;margin-right:6px}
+  .crumbs .back:hover{background:#128C7E;text-decoration:none}
+  .crumbs .sep{color:#8aa39b;font-weight:400}
+  .crumbs .cur{color:#111B21}
+  @media (max-width:600px){.crumbs{padding:12px 16px;font-size:16px}}
 </style>
 </head>
 <body>
 <header><b>Engage<span>ONE</span></b><a href="/logout">Sign out</a></header>
+<nav class="crumbs" aria-label="Breadcrumb"><span class="cur">Use cases</span></nav>
 <main>
   <h1>Use cases</h1>
   <p class="sub">Pick a use case to see how it works on WhatsApp.</p>

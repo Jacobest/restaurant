@@ -18,12 +18,21 @@
   h1{margin:0 0 8px;color:#075E54}
   .lead{color:#444;line-height:1.6;max-width:680px}
   .soon{display:inline-block;margin-top:10px;padding:10px 16px;border-radius:10px;background:#fff;color:#667781}
+  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2}
+  .crumbs[hidden]{display:none}
+  .crumbs a{color:#075E54;text-decoration:none}
+  .crumbs a:hover{text-decoration:underline}
+  .crumbs .back{background:#075E54;color:#fff;padding:8px 14px;border-radius:99px;font-size:15px;margin-right:6px}
+  .crumbs .back:hover{background:#128C7E;text-decoration:none}
+  .crumbs .sep{color:#8aa39b;font-weight:400}
+  .crumbs .cur{color:#111B21}
+  @media (max-width:600px){.crumbs{padding:12px 16px;font-size:16px}}
 </style>
 </head>
 <body>
 <header><b>Engage<span>ONE</span></b><span><a href="/uc/">All use cases</a><a href="/logout">Sign out</a></span></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <span class="cur">Doctor's Appointment</span></nav>
 <main>
-  <div class="crumb"><a href="/uc/">Use cases</a> / Doctor's Appointment</div>
   <h1>Doctor's Appointment</h1>
   <p class="lead">Patients book, change or cancel a visit in chat and get reminders before the appointment.</p>
   <div class="soon">The demos for this use case are coming soon.</div>
