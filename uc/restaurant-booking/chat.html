@@ -68,7 +68,7 @@
 <header><b>Engage<span>ONE</span></b><span><a href="/logout">Sign out</a></span></header>
 <nav class="crumbs" aria-label="Breadcrumb" id="crumbs" hidden><a class="back" href="/uc/restaurant-booking/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/restaurant-booking/">Restaurant Booking</a> <span class="sep">›</span> <span class="cur">Live chat</span></nav>
 <div id="root"></div>
-<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(!d.role)document.querySelector("header span").remove();else document.getElementById("crumbs").hidden=false}).catch(()=>{})</script>
+<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(!d.role)document.querySelector("header>span").remove();else document.getElementById("crumbs").hidden=false}).catch(()=>{})</script>
 <script>
 const SERIF = "'Cormorant Garamond',Georgia,serif";
 function buildPhones() {
