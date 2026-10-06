@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/png" href="/favicon.png?v=2">
+<title>Salon Booking – EngageONE</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#EFEAE2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111B21}
+  header{background:#075E54;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+  header b{font-size:18px}
+  header b span{color:#25D366}
+  .hl{display:flex;align-items:center;gap:14px}
+  .demo{font-size:18px;color:#D9FDD3;padding-left:14px;border-left:1px solid rgba(255,255,255,.35);white-space:nowrap}
+  .demo strong{font-weight:700;color:#fff}
+  header a{color:#D9FDD3;font-size:14px;text-decoration:none;margin-left:16px}
+  main{max-width:900px;margin:0 auto;padding:32px 20px 60px}
+  .crumb{font-size:14px;margin-bottom:14px}
+  .crumb a{color:#128C7E;text-decoration:none}
+  h1{margin:0 0 8px;color:#075E54}
+  .lead{color:#444;line-height:1.6;max-width:680px}
+  .lead{margin-bottom:28px}
+  h3{margin:0 0 14px;color:#075E54}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .card{display:block;background:#fff;border-radius:14px;padding:22px;text-decoration:none;color:inherit;box-shadow:0 4px 16px rgba(7,94,84,.12);transition:transform .15s}
+  .card:hover{transform:translateY(-3px)}
+  .card h2{margin:0 0 6px;font-size:18px;color:#075E54}
+  .card p{margin:0;color:#667781;font-size:14px;line-height:1.5}
+  .go{display:inline-block;margin-top:12px;font-size:14px;font-weight:600;color:#128C7E}
+  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2}
+  .crumbs[hidden]{display:none}
+  .crumbs a{color:#075E54;text-decoration:none}
+  .crumbs a:hover{text-decoration:underline}
+  .crumbs .back{background:#075E54;color:#fff;padding:8px 14px;border-radius:99px;font-size:15px;margin-right:6px}
+  .crumbs .back:hover{background:#128C7E;text-decoration:none}
+  .crumbs .sep{color:#8aa39b;font-weight:400}
+  .crumbs .cur{color:#111B21}
+  @media (max-width:600px){.crumbs{padding:12px 16px;font-size:16px}}
+</style>
+</head>
+<body>
+<header><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">Salon <strong>Demo</strong></span></div><span><a href="/uc/">All use cases</a><a href="/logout">Sign out</a></span></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <span class="cur">Salon Booking</span></nav>
+<main>
+  <h1>Salon Booking</h1>
+  <p class="lead">Clients book a service with their favourite stylist on WhatsApp, pay a small deposit, get reminders and rebook after the visit.</p>
+  <h3>Demos</h3>
+  <div class="grid">
+    <a class="card" href="chat.html">
+      <h2>Live chat (auto-play)</h2>
+      <p>One phone that plays a salon booking by itself: service, stylist, time, deposit, reminders and rebooking. Jump to any step.</p>
+      <span class="go">Open demo →</span>
+    </a>
+  </div>
+</main>
+<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(d.role==="owner"){const n=document.querySelector("header a[href=\"/logout\"]");if(n)n.insertAdjacentHTML("beforebegin","<a href=\"/admin/\">Admin</a>")}})</script>
+</body>
+</html>
