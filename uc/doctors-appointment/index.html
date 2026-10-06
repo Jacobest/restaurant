@@ -20,7 +20,14 @@
   .crumb a{color:#128C7E;text-decoration:none}
   h1{margin:0 0 8px;color:#075E54}
   .lead{color:#444;line-height:1.6;max-width:680px}
-  .soon{display:inline-block;margin-top:10px;padding:10px 16px;border-radius:10px;background:#fff;color:#667781}
+  .lead{margin-bottom:28px}
+  h3{margin:0 0 14px;color:#075E54}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .card{display:block;background:#fff;border-radius:14px;padding:22px;text-decoration:none;color:inherit;box-shadow:0 4px 16px rgba(7,94,84,.12);transition:transform .15s}
+  .card:hover{transform:translateY(-3px)}
+  .card h2{margin:0 0 6px;font-size:18px;color:#075E54}
+  .card p{margin:0;color:#667781;font-size:14px;line-height:1.5}
+  .go{display:inline-block;margin-top:12px;font-size:14px;font-weight:600;color:#128C7E}
   .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2}
   .crumbs[hidden]{display:none}
   .crumbs a{color:#075E54;text-decoration:none}
@@ -38,7 +45,14 @@
 <main>
   <h1>Doctor's Appointment</h1>
   <p class="lead">Patients book, change or cancel a visit in chat and get reminders before the appointment.</p>
-  <div class="soon">The demos for this use case are coming soon.</div>
+  <h3>Demos</h3>
+  <div class="grid">
+    <a class="card" href="chat.html">
+      <h2>Live chat (auto-play)</h2>
+      <p>One phone that plays a whole appointment by itself: booking, reminders, rescheduling and feedback. Jump to any step.</p>
+      <span class="go">Open demo →</span>
+    </a>
+  </div>
 </main>
 <script>fetch("/api/me").then(r=>r.json()).then(d=>{if(d.role==="owner"){const n=document.querySelector("header a[href=\"/logout\"]");if(n)n.insertAdjacentHTML("beforebegin","<a href=\"/admin/\">Admin</a>")}})</script>
 </body>
