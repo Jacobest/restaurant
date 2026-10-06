@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Restaurant Booking – WhatsApp Demo</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#EFEAE2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111B21}
+  header{background:#075E54;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+  header b{font-size:18px}
+  header a{color:#D9FDD3;font-size:14px;text-decoration:none;margin-left:16px}
+  main{max-width:900px;margin:0 auto;padding:32px 20px 60px}
+  .crumb{font-size:14px;margin-bottom:14px}
+  .crumb a{color:#128C7E;text-decoration:none}
+  h1{margin:0 0 8px;color:#075E54}
+  .lead{margin:0 0 28px;color:#444;line-height:1.6;max-width:680px}
+  h3{margin:0 0 14px;color:#075E54}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .card{display:block;background:#fff;border-radius:14px;padding:22px;text-decoration:none;color:inherit;box-shadow:0 4px 16px rgba(7,94,84,.12);transition:transform .15s}
+  .card:hover{transform:translateY(-3px)}
+  .card h2{margin:0 0 6px;font-size:18px;color:#075E54}
+  .card p{margin:0;color:#667781;font-size:14px;line-height:1.5}
+  .go{display:inline-block;margin-top:12px;font-size:14px;font-weight:600;color:#128C7E}
+</style>
+</head>
+<body>
+<header><b>WhatsApp Demo</b><span><a href="/uc/">All use cases</a><a href="/logout">Sign out</a></span></header>
+<main>
+  <div class="crumb"><a href="/uc/">Use cases</a> / Restaurant Booking</div>
+  <h1>Restaurant Booking</h1>
+  <p class="lead">A guest books a table at a wine-estate restaurant using only WhatsApp. The bot collects the date, party size and dietary needs, checks availability, confirms the booking, sends reminders, and later handles the bill and a feedback request.</p>
+  <h3>Demos</h3>
+  <div class="grid">
+    <a class="card" href="flow.html">
+      <h2>Guest journey diagram</h2>
+      <p>The full flow in swim lanes. Switch between the full diagram, the owner's view and the phone view.</p>
+      <span class="go">Open demo →</span>
+    </a>
+    <a class="card" href="phones.html">
+      <h2>Phone chat screens</h2>
+      <p>All 12 steps as WhatsApp chats, as the guest sees them. Made for viewing on a phone.</p>
+      <span class="go">Open demo →</span>
+    </a>
+  </div>
+</main>
+</body>
+</html>
