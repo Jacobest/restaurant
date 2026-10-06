@@ -2,7 +2,7 @@
 import { getSession } from './_auth.js';
 
 const PUBLIC = new Set([
-  '/login', '/logout', '/invite', '/api/accept-invite', '/api/me',
+  '/login', '/logout', '/invite', '/api/accept-invite', '/api/me', '/favicon.png',
   '/uc/restaurant-booking/chat', '/uc/restaurant-booking/chat.html',
 ]);
 
