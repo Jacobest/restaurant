@@ -235,7 +235,7 @@
   </div>
 
   <div class="sync"><span class="pill"><i></i>One conversation, two views. Each message appears on both screens together.</span>
-    <div class="ctl"><button id="play">⏸ Pause</button><button id="restart">↺ Restart</button><button id="speed">Speed 1×</button></div></div>
+    <div class="ctl"><button id="play">⏸ Pause</button><button id="restart">↺ Restart</button><button id="speed">Speed 0.5×</button></div></div>
   <div class="steps" id="steps"></div>
 </div>
 
@@ -303,7 +303,7 @@ addEventListener('resize', fit); fit();
   stepsBox.innerHTML = steps.map(([t], i) => '<button data-i="' + i + '">' + (i + 1) + ' ' + t + '</button>').join('');
   const stepBtns = [...stepsBox.children];
 
-  let run = 0, paused = false, speed = 1, started = false, pos = 0;
+  let run = 0, paused = false, speed = 0.5, started = false, pos = 0;
   const sleep = ms => new Promise(r => setTimeout(r, ms / speed));
   const toBottom = () => { dmsgs.scrollTo({ top: dmsgs.scrollHeight, behavior: 'smooth' }); pchat.scrollTo({ top: pchat.scrollHeight, behavior: 'smooth' }); };
   const tpl = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
