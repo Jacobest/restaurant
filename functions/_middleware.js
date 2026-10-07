@@ -16,7 +16,7 @@ export async function onRequest({ request, env, next }) {
 
   if (path === '/') return session ? Response.redirect(url.origin + '/uc/', 302) : next();
   if (!session) {
-    return path.startsWith('/api/') ? new Response('Unauthorized', { status: 401 }) : Response.redirect(url.origin + '/', 302);
+    return path.startsWith('/api/') ? new Response('Unauthorized', { status: 401 }) : Response.redirect(url.origin + '/?next=' + encodeURIComponent(path + url.search), 302);
   }
   if ((path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/')) && session.role !== 'owner') {
     return Response.redirect(url.origin + '/uc/', 302);

@@ -5,7 +5,10 @@ export async function onRequestPost({ request, env }) {
   const email = cleanEmail(form.get('email'));
   const password = String(form.get('password') || '');
   const origin = new URL(request.url).origin;
-  const fail = Response.redirect(origin + '/?error=1', 303);
+  const next = String(form.get('next') || '');
+  // Only allow a path on this site: starts with one "/", no "//", no backslash, no line breaks.
+  const safeNext = next.startsWith('/') && !next.startsWith('//') && !/[\\\r\n]/.test(next) ? next : '/uc/';
+  const fail = Response.redirect(origin + '/?error=1' + (safeNext !== '/uc/' ? '&next=' + encodeURIComponent(safeNext) : ''), 303);
   if (!env.DEMO_PASSWORD || !email) return fail;
 
   let ok = false;
@@ -19,6 +22,6 @@ export async function onRequestPost({ request, env }) {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: origin + '/uc/', 'Set-Cookie': await sessionCookie(env, email) },
+    headers: { Location: origin + safeNext, 'Set-Cookie': await sessionCookie(env, email) },
   });
 }

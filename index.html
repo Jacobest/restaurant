@@ -26,6 +26,7 @@
     <div class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg></div>
     <h1>Engage<span style="color:#25D366">ONE</span></h1>
     <p>Sign in to see the use cases.</p>
+    <input type="hidden" name="next" id="next">
     <label for="em">Email</label>
     <input id="em" name="email" type="email" autocomplete="username" required autofocus style="margin-bottom:14px">
     <label for="pw">Password</label>
@@ -34,7 +35,9 @@
     <div class="err" id="err">Wrong email or password. Try again.</div>
   </form>
   <script>
-    if (new URLSearchParams(location.search).has('error')) document.getElementById('err').classList.add('show');
+    const q = new URLSearchParams(location.search);
+    if (q.has('error')) document.getElementById('err').classList.add('show');
+    document.getElementById('next').value = q.get('next') || '';
   </script>
 </body>
 </html>
