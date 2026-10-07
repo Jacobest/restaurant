@@ -84,14 +84,14 @@ function buildPhones() {
   const chip = t => `<div style="align-self:center;background:#E1F2FB;color:${T.mute};font-size:9.5px;padding:3px 9px;border-radius:7px;box-shadow:0 1px 0.5px rgba(11,20,26,0.1)">${t}</div>`;
   const row = (a, b, bold) => `<div style="display:flex;justify-content:space-between;${bold ? 'font-weight:700;border-top:1px solid #dfe5e7;margin-top:3px;padding-top:3px' : ''}"><span>${a}</span><span>${b}</span></div>`;
   const steps = [
-    ['Open the chat', [chip('Today'), O('Hi, I’d like to book an appointment'), I('Welcome to <b>[Salon Name]</b> 💇<br>What would you like to do?'), btns(['Book an appointment', 'Prices', 'My bookings'])]],
+    ['Open the chat', [chip('Today'), O('Hi, I’d like to book an appointment'), I('Welcome to <b>Studio Bloom</b> 💇<br>What would you like to do?'), btns(['Book an appointment', 'Prices', 'My bookings'])]],
     ['Choose a service', [O('Book an appointment'), I('What are you booking?'), btns(['Haircut', 'Colour', 'Nails', 'Treatments']), O('Colour'), I('Which colour service?'), btns(['Toner · R350', 'Half head highlights · R850', 'Full colour · R1 100']), O('Half head highlights · R850')]],
-    ['Choose a stylist', [I('Who would you like?'), btns(['[Stylist 1]', '[Stylist 2]', 'No preference']), O('[Stylist 1]')]],
-    ['Date and time', [I('Which day suits you?'), btns(['📅 Pick a date']), O('21/11/2026'), I('Free times with <b>[Stylist 1]</b>:'), btns(['09:00', '11:30', '14:00']), O('11:30')]],
+    ['Choose a stylist', [I('Who would you like?'), btns(['Lerato', 'Jade', 'No preference']), O('Lerato')]],
+    ['Date and time', [I('Which day suits you?'), btns(['📅 Pick a date']), O('21/11/2026'), I('Free times with <b>Lerato</b>:'), btns(['09:00', '11:30', '14:00']), O('11:30')]],
     ['Add-ons and deposit', [I('Add a blow-dry for <b>R120</b>?'), btns(['Yes, add it', 'No thanks']), O('Yes, add it'), I('A <b>R100 deposit</b> secures your booking. It comes off your final bill.'), btns(['Pay deposit']), O('Pay deposit'), I('✅ Deposit received. Thank you!')]],
-    ['Confirm', [I('<b>Booking summary</b>' + [['Service', 'Half head highlights'], ['Add-on', 'Blow-dry'], ['Stylist', '[Stylist 1]'], ['Date', '21/11/2026'], ['Time', '11:30'], ['Total', 'R970.00', true]].map(([a, b, bold]) => row(a, b, bold)).join('')), btns(['Confirm', 'Change']), O('Confirm'), I('✅ <b>You’re booked!</b><br>Ref: [REF-0000]<br>📍 [Salon Name], [Address]'), btns(['Add to calendar', 'Manage booking'])]],
-    ['Reminders', [chip('Fri 20/11/2026'), I('⏰ Reminder: you’re booked with <b>[Stylist 1]</b> tomorrow at 11:30.', '11:30'), btns(['See you there', 'Reschedule']), O('See you there', '11:31'), chip('Sat 21/11/2026'), I('See you in 1 hour! Running late? Just reply here.', '10:30'), O('Running 10 minutes late, sorry!', '11:05'), I('No problem, we’ll let [Stylist 1] know 👍', '11:05')]],
-    ['After the visit', [chip('After the appointment'), I('Thank you for visiting <b>[Salon Name]</b> 💚 How was your visit? (1–5)', '14:10'), O('5 – Loved it', '14:25'), I('Thank you! Colour is best refreshed in 6 weeks. Shall we book your next visit?', '14:25'), btns(['Book in 6 weeks', 'Not now']), O('Book in 6 weeks', '14:26'), I('Great! I’ll send you the available days 📅', '14:26')]],
+    ['Confirm', [I('<b>Booking summary</b>' + [['Service', 'Half head highlights'], ['Add-on', 'Blow-dry'], ['Stylist', 'Lerato'], ['Date', '21/11/2026'], ['Time', '11:30'], ['Total', 'R970.00', true]].map(([a, b, bold]) => row(a, b, bold)).join('')), btns(['Confirm', 'Change']), O('Confirm'), I('✅ <b>You’re booked!</b><br>Ref: SB-2026-0077<br>📍 Studio Bloom, 8 Long Street, Cape Town'), btns(['Add to calendar', 'Manage booking'])]],
+    ['Reminders', [chip('Fri 20/11/2026'), I('⏰ Reminder: you’re booked with <b>Lerato</b> tomorrow at 11:30.', '11:30'), btns(['See you there', 'Reschedule']), O('See you there', '11:31'), chip('Sat 21/11/2026'), I('See you in 1 hour! Running late? Just reply here.', '10:30'), O('Running 10 minutes late, sorry!', '11:05'), I('No problem, we’ll let Lerato know 👍', '11:05')]],
+    ['After the visit', [chip('After the appointment'), I('Thank you for visiting <b>Studio Bloom</b> 💚 How was your visit? (1–5)', '14:10'), O('5 – Loved it', '14:25'), I('Thank you! Colour is best refreshed in 6 weeks. Shall we book your next visit?', '14:25'), btns(['Book in 6 weeks', 'Not now']), O('Book in 6 weeks', '14:26'), I('Great! I’ll send you the available days 📅', '14:26')]],
   ];
 
   // ---- Auto-playing single phone ----
@@ -105,7 +105,7 @@ function buildPhones() {
     <div class="phone"><div class="side s1"></div><div class="side s2"></div><div class="side s3"></div>
       <div class="screen">
         <div class="top"><div class="status"><span>9:41</span><span style="letter-spacing:2px">▂▄▆ ▮</span></div>
-          <div class="who"><span style="font-size:16px">‹</span><div class="av">💇</div><div style="line-height:1.2"><div style="font-size:12.5px;font-weight:600">[Salon Name] <span style="color:${T.green}">✔</span></div><div id="presence" style="font-size:9.5px;opacity:.8">Business account</div></div></div></div>
+          <div class="who"><span style="font-size:16px">‹</span><div class="av">💇</div><div style="line-height:1.2"><div style="font-size:12.5px;font-weight:600">Studio Bloom <span style="color:${T.green}">✔</span></div><div id="presence" style="font-size:9.5px;opacity:.8">Business account</div></div></div></div>
         <div id="chat"></div>
         <div class="bar"><div class="inp">Message</div><div class="mic">🎤</div></div>
         <div class="home"></div><div class="notch"></div>
