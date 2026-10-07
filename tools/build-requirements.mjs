@@ -74,13 +74,14 @@ function page(u) {
   <div class="basics">${COMMON.basics.map(([t, d]) => `<div class="b"><b>${esc(t)}</b><span>${esc(d.replace("{biz}", u.biz))}</span></div>`).join('')}</div>
 
   <h2>2. What S10U AI Studio gives you</h2>
+  <p class="note">The full list, with the source for every fact and how sure we are, is on the <a href="/uc/s10u/">S10U platform facts</a> page.</p>
   <div class="two">
     <div class="card"><span class="tag ok">Stated on S10U’s site</span><ul>${li(COMMON.s10uStated)}</ul></div>
-    <div class="card"><span class="tag ask">Ask S10U (not on the site)</span><ul>${li(COMMON.s10uQuestions)}</ul></div>
+    <div class="card"><span class="tag ask">Ask S10U before you promise anything</span><ul>${li(COMMON.s10uQuestions)}</ul></div>
   </div>
 
   <h2>3. Connections for this demo</h2>
-  <p class="note">Each row shows the simplest option first, then the better long-term options. Where S10U’s own connectors are not confirmed, the link can usually be made through an API or an automation tool such as Make, n8n or Zapier.</p>
+  <p class="note">Each row shows the simplest option first, then the better long-term options. S10U says it has 80+ integrations but publishes only categories (CRM, ERP, eCommerce, helpdesk, payment gateways), not product names. So confirm every connection below with S10U. If there is no ready connector, the usual routes are S10U custom development, its API and webhooks, or an automation tool such as Make, n8n or Zapier. See <a href="/uc/s10u/">how integrations get connected</a>.</p>
   <div class="fns">${r.functions.map(fn).join('')}</div>
 
   <h2>4. The AI behind the chat</h2>
@@ -94,11 +95,12 @@ function page(u) {
 
   <footer>
     Sources: <a href="https://www.s10u.co.za">s10u.co.za</a> (AI Studio, WhatsApp for Business, AI Studio Terms, case studies);
+    <a href="/uc/s10u/">S10U platform facts</a>;
     <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing">Meta WhatsApp pricing</a>;
     <a href="https://learn.dineplan.com/api-integration">Dineplan API</a>;
     <a href="https://paystack.com/stripe/south-africa">Paystack in South Africa</a>;
     <a href="https://modelcontextprotocol.io">Model Context Protocol</a>.
-    Tool popularity is our judgement, not measured market share. Prices change: check each vendor’s page. WhatsApp message prices changed in 2026, so check Meta’s current rate card for the “Rest of Africa” region.
+    Tool popularity is our judgement, not measured market share. Prices change: check each vendor’s page. Meta charges per delivered template message and South Africa has its own rate card in US dollars, so check Meta’s current rate card before quoting a price.
   </footer>
 </main>
 </body>

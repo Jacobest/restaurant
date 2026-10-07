@@ -23,6 +23,7 @@ const cards = USECASES.map(u => {
       </div>
     </a>`;
 });
+hub = hub.replace(/<p class="sub">[\s\S]*?<\/p>/, '<p class="sub">Pick a use case to see how it works on WhatsApp. <a href="/uc/s10u/" style="color:#128C7E;font-weight:600">S10U platform facts and integrations →</a></p>');
 hub = hub.replace(m[0], '<div class="grid">\n\n' + cards.join('\n\n') + '\n\n  </div>\n</main>');
 fs.writeFileSync(ROOT + 'uc/index.html', hub);
 console.log('hub built with', cards.length, 'cards');
