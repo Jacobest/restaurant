@@ -4,8 +4,8 @@ import { getSession } from './_auth.js';
 const PUBLIC = new Set([
   '/login', '/logout', '/invite', '/api/accept-invite', '/api/me', '/favicon.png',
 ]);
-// Every use case's live chat demo is public so it can be shared with customers.
-const CHAT_RE = /^\/uc\/[a-z0-9-]+\/chat(\.html)?$/;
+// Every use case's live chat demos (chat and dashboard-chat) are public so they can be shared with customers.
+const CHAT_RE = /^\/uc\/[a-z0-9-]+\/(chat|dashboard-chat)(\.html)?$/;
 
 export async function onRequest({ request, env, next }) {
   const url = new URL(request.url);

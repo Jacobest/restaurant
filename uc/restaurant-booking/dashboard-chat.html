@@ -158,7 +158,7 @@
 </head>
 <body>
 <header class="site"><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">Restaurant <strong>Demo</strong></span></div><a href="/logout">Sign out</a></header>
-<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/restaurant-booking/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/restaurant-booking/">Restaurant Booking</a> <span class="sep">›</span> <span class="cur">Live chat with dashboard</span></nav>
+<nav class="crumbs" aria-label="Breadcrumb" id="crumbs" hidden><a class="back" href="/uc/restaurant-booking/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/restaurant-booking/">Restaurant Booking</a> <span class="sep">›</span> <span class="cur">Live chat with dashboard</span></nav>
 
 <div class="stage">
   <p class="title" id="now">Scroll down or press play</p>
@@ -238,6 +238,11 @@
 </div>
 
 <script>
+// Public visitors see no internal links; signed-in users see the breadcrumbs and Sign out.
+fetch("/api/me").then(r => r.json()).then(d => {
+  if (d.role) document.getElementById("crumbs").hidden = false;
+  else { const a = document.querySelector("header.site a"); if (a) a.remove(); }
+}).catch(() => {});
 function loadSteps() {
   const T = { head: '#075E54', teal: '#128C7E', green: '#25D366', out: '#D9FDD3', bg: '#EFEAE2', ink: '#111B21', mute: '#667781', link: '#027EB5', tick: '#53BDEB' };
   const time = t => `<span style="float:right;margin:4px 0 0 8px;font-size:8.5px;color:${T.mute}">${t}</span>`;
