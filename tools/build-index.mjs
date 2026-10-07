@@ -1,10 +1,30 @@
-<!doctype html>
+// Builds uc/<slug>/index.html: the use case page with the 5 standard demos, in this order:
+//   1 Live phone chat   2 Live chat with dashboard   3 Phone chat screens   4 Journey diagram   5 What you need
+// Run:  node tools/build-index.mjs
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { USECASES } from './usecases.mjs';
+
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+const DEMOS = u => [
+  ['chat.html', 'Live phone chat (auto-play)', `One phone that plays a whole ${u.who} conversation by itself. Messages pop up and the chat scrolls. Jump to any step.`],
+  ['dashboard-chat.html', 'Live chat with dashboard (auto-play)', `The ${u.who}’s phone next to the S10U AI Studio inbox. Both screens show the same chat together.`],
+  ['phones.html', 'Phone chat screens', 'Every step as a WhatsApp screen, side by side. Made for viewing on a phone.'],
+  ['flow.html', u.slug === 'restaurant-booking' ? 'Guest journey diagram' : 'Journey diagram', 'The full flow in swim lanes: the customer, the bot, your systems and your team.'],
+  ['requirements.html', 'What you need to make this work', 'Integrations and set-up, with an easy and an ideal option for each, for South African businesses.'],
+];
+
+for (const u of USECASES) {
+  const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/png" href="/favicon.png?v=2">
-<title>Restaurant Booking – EngageONE</title>
+<title>${esc(u.name)} – EngageONE</title>
 <style>
   *{box-sizing:border-box}
   body{margin:0;background:#EFEAE2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111B21}
@@ -37,40 +57,24 @@
 </style>
 </head>
 <body>
-<header><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">Restaurant <strong>Demo</strong></span></div><span><a href="/uc/">All use cases</a><a href="/logout">Sign out</a></span></header>
-<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <span class="cur">Restaurant Booking</span></nav>
+<header><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">${esc(u.label)} <strong>Demo</strong></span></div><span><a href="/uc/">All use cases</a><a href="/logout">Sign out</a></span></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <span class="cur">${esc(u.name)}</span></nav>
 <main>
-  <h1>Restaurant Booking</h1>
-  <p class="lead">A guest books a table at Florentine’s Bistro using only WhatsApp. The bot collects the date, party size and dietary needs, checks availability, confirms the booking, sends reminders, and later handles the bill and a feedback request.</p>
+  <h1>${esc(u.name)}</h1>
+  <p class="lead">${esc(u.lead)}</p>
   <h3>Demos</h3>
   <div class="grid">
-    <a class="card" href="chat.html"><span class="n">1</span>
-      <h2>Live phone chat (auto-play)</h2>
-      <p>One phone that plays a whole guest conversation by itself. Messages pop up and the chat scrolls. Jump to any step.</p>
+${DEMOS(u).map(([href, t, d], i) => `    <a class="card" href="${href}"><span class="n">${i + 1}</span>
+      <h2>${esc(t)}</h2>
+      <p>${esc(d)}</p>
       <span class="go">Open →</span>
-    </a>
-    <a class="card" href="dashboard-chat.html"><span class="n">2</span>
-      <h2>Live chat with dashboard (auto-play)</h2>
-      <p>The guest’s phone next to the S10U AI Studio inbox. Both screens show the same chat together.</p>
-      <span class="go">Open →</span>
-    </a>
-    <a class="card" href="phones.html"><span class="n">3</span>
-      <h2>Phone chat screens</h2>
-      <p>Every step as a WhatsApp screen, side by side. Made for viewing on a phone.</p>
-      <span class="go">Open →</span>
-    </a>
-    <a class="card" href="flow.html"><span class="n">4</span>
-      <h2>Guest journey diagram</h2>
-      <p>The full flow in swim lanes: the customer, the bot, your systems and your team.</p>
-      <span class="go">Open →</span>
-    </a>
-    <a class="card" href="requirements.html"><span class="n">5</span>
-      <h2>What you need to make this work</h2>
-      <p>Integrations and set-up, with an easy and an ideal option for each, for South African businesses.</p>
-      <span class="go">Open →</span>
-    </a>
+    </a>`).join('\n')}
   </div>
 </main>
-<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(d.role==="owner"){const n=document.querySelector("header a[href=\"/logout\"]");if(n)n.insertAdjacentHTML("beforebegin","<a href=\"/admin/\">Admin</a>")}})</script>
+<script>fetch("/api/me").then(r=>r.json()).then(d=>{if(d.role==="owner"){const n=document.querySelector("header a[href=\\"/logout\\"]");if(n)n.insertAdjacentHTML("beforebegin","<a href=\\"/admin/\\">Admin</a>")}})</script>
 </body>
 </html>
+`;
+  fs.writeFileSync(ROOT + `uc/${u.slug}/index.html`, html);
+  console.log('built', u.slug);
+}
