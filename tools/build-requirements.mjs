@@ -81,7 +81,7 @@ function page(u) {
   </div>
 
   <h2>3. Connections for this demo</h2>
-  <p class="note">Each row shows the simplest option first, then the better long-term options. S10U says it has 80+ integrations but publishes only categories (CRM, ERP, eCommerce, helpdesk, payment gateways), not product names. So confirm every connection below with S10U. If there is no ready connector, the usual routes are S10U custom development, its API and webhooks, or an automation tool such as Make, n8n or Zapier. See <a href="/uc/s10u/">how integrations get connected</a>.</p>
+  <p class="note">Each row shows the simplest option first, then the better long-term options. S10U says it has 80+ integrations but publishes only categories (CRM, ERP, eCommerce, helpdesk, payment gateways), not product names. So confirm every connection below with S10U. If there is no ready connector, the usual routes are S10U custom development, its API and webhooks, or an automation tool such as Make, n8n or Zapier. See <a href="/uc/s10u/">how integrations get connected</a>, or the <a href="/uc/integrations/">Integration guide</a> for every tool type in one place.</p>
   <div class="fns">${r.functions.map(fn).join('')}</div>
 
   <h2>4. The AI behind the chat</h2>

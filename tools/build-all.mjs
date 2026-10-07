@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-for (const s of ['build-chats', 'build-demos', 'build-journeys', 'build-requirements', 'build-index', 'build-s10u', 'build-hub']) {
+for (const s of ['build-chats', 'build-demos', 'build-journeys', 'build-requirements', 'build-index', 'build-s10u', 'build-integrations', 'build-hub']) {
   console.log('\n== ' + s);
   execFileSync(process.execPath, [path.join(dir, s + '.mjs')], { stdio: 'inherit' });
 }
