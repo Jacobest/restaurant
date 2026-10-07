@@ -22,9 +22,10 @@ Every demo shows the client's name (for example "Florentine's Bistro") and uses 
 - `tools/usecases.mjs`: names, labels, client name, dashboard contacts and AI-summary lines.
 - `tools/journeys.mjs`: diagram data (nodes and edges).
 - `tools/requirements.mjs`: integration content. Re-check S10U (s10u.co.za) and South African tools before changing it.
-- Run: `node tools/build-demos.mjs` (dashboard + phones), `node tools/build-journeys.mjs`, `node tools/build-requirements.mjs`, `node tools/build-index.mjs`.
-- The restaurant is the reference: its `dashboard-chat.html`, `phones.html` and `flow.html` are the templates/hand-made; the build scripts copy from them.
-- New use case: add `uc/<slug>/chat.html` (copy a sibling), add entries in the three data files, add a card in `uc/index.html`, run all builds.
+- `tools/cases/<slug>.mjs`: one file per newer use case (meta, chat, journey, requirements). Spec: `tools/cases/README.md`. Check one with `node tools/validate-case.mjs <slug>`. `tools/all-cases.mjs` merges everything (add the slug to its `ORDER` list).
+- Run everything with `node tools/build-all.mjs` (chats, dashboard + phones, journeys, requirements, index pages, and the cards on `uc/index.html`).
+- The restaurant is the reference: its `chat.html`, `dashboard-chat.html`, `phones.html` and `flow.html` are the templates/hand-made; the build scripts copy from them.
+- New use case: write `tools/cases/<slug>.mjs` following the README, add the slug to `ORDER` in `tools/all-cases.mjs`, validate, run `node tools/build-all.mjs`, test, commit.
 - Any `/uc/<name>/chat` and `/uc/<name>/dashboard-chat` page is public (see `functions/_middleware.js`). Everything else needs a login.
 
 ## Conventions

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="/favicon.png?v=2">
+<title>EngageONE – Feedback and Reviews phone chat screens</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F0F7F2;color:#111B21;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .page{max-width:1400px;margin:0 auto;padding:32px 16px 48px}
+  .h1{font-size:clamp(28px,5vw,46px);line-height:1.05;margin:0}
+  .sub{font-size:clamp(16px,2.6vw,22px)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:48px 16px;justify-items:center}
+  @media (max-width:700px){.grid{grid-template-columns:1fr}}
+  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2}
+  .crumbs[hidden]{display:none}
+  .crumbs a{color:#075E54;text-decoration:none}
+  .crumbs a:hover{text-decoration:underline}
+  .crumbs .back{background:#075E54;color:#fff;padding:8px 14px;border-radius:99px;font-size:15px;margin-right:6px}
+  .crumbs .back:hover{background:#128C7E;text-decoration:none}
+  .crumbs .sep{color:#8aa39b;font-weight:400}
+  .crumbs .cur{color:#111B21}
+  @media (max-width:600px){.crumbs{padding:12px 16px;font-size:16px}}
+  header.site{background:#075E54;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header.site b{font-size:18px} header.site b span{color:#25D366}
+  header.site a{color:#D9FDD3;font-size:14px;text-decoration:none}
+  header.site .hl{display:flex;align-items:center;gap:14px}
+  header.site .demo{font-size:18px;color:#D9FDD3;padding-left:14px;border-left:1px solid rgba(255,255,255,.35);white-space:nowrap}
+  header.site .demo strong{font-weight:700;color:#fff}
+</style>
+</head>
+<body>
+<header class="site"><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">Feedback <strong>Demo</strong></span></div><a href="/logout">Sign out</a></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/feedback-reviews/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/feedback-reviews/">Feedback and Reviews</a> <span class="sep">›</span> <span class="cur">Phone chat screens</span></nav>
+<div id="root"></div>
+<script>
+const SERIF = "'Cormorant Garamond',Georgia,serif";
+function buildPhones() {
+  const T = { head: '#075E54', teal: '#128C7E', green: '#25D366', out: '#D9FDD3', bg: '#EFEAE2', ink: '#111B21', mute: '#667781', link: '#027EB5', tick: '#53BDEB' };
+  const time = t => `<span style="float:right;margin:4px 0 0 8px;font-size:8.5px;color:${T.mute}">${t}</span>`;
+  const tickTime = t => `<span style="float:right;margin:4px 0 0 8px;font-size:8.5px;color:${T.mute}">${t} <span style="color:${T.tick}">✓✓</span></span>`;
+  const bub = (side, html, t) => `<div style="align-self:${side === 'in' ? 'flex-start' : 'flex-end'};max-width:80%;background:${side === 'in' ? '#fff' : T.out};border-radius:${side === 'in' ? '2px 9px 9px 9px' : '9px 2px 9px 9px'};padding:6px 8px 4px;font-size:11px;line-height:1.35;color:${T.ink};box-shadow:0 1px 0.5px rgba(11,20,26,0.13)">${html}<div style="overflow:hidden">${side === 'in' ? time(t) : tickTime(t)}</div></div>`;
+  const I = (h, t = '19:02') => bub('in', h, t), O = (h, t = '19:03') => bub('out', h, t);
+  const btns = a => `<div style="align-self:flex-start;width:80%;display:flex;flex-direction:column;gap:3px;margin-top:-3px">${a.map(b => `<div style="background:#fff;border-radius:9px;text-align:center;padding:7px;font-size:11px;font-weight:500;color:${T.link};box-shadow:0 1px 0.5px rgba(11,20,26,0.13)">${b}</div>`).join('')}</div>`;
+  const chip = t => `<div style="align-self:center;background:#E1F2FB;color:${T.mute};font-size:9.5px;padding:3px 9px;border-radius:7px;box-shadow:0 1px 0.5px rgba(11,20,26,0.1)">${t}</div>`;
+  const row = (a, b, bold) => `<div style="display:flex;justify-content:space-between;${bold ? 'font-weight:700;border-top:1px solid #dfe5e7;margin-top:3px;padding-top:3px' : ''}"><span>${a}</span><span>${b}</span></div>`;
+  const steps = [
+    ['Feedback request', [chip('Sat 14/11/2026 · after the tour'), I('Hi Naledi 👋 Thanks for riding with <b>Vineyard Bike Tours</b> today. How was your experience? (1–5)', '16:45'), btns(['1', '2', '3', '4', '5'])]],
+    ['Happy score', [O('5', '16:52'), I('Wonderful, thank you! 🎉', '16:52')]],
+    ['What went well', [I('What did you enjoy most?', '16:52'), btns(['The guide', 'The wine tasting', 'The scenery', 'Something else']), O('The guide and the tasting stop 😍', '16:54'), I('So glad to hear it! We’ll tell Sipho.', '16:54')]],
+    ['Review link', [I('If you have a minute, a Google review helps other riders find us. It is completely optional ⭐', '16:55'), btns(['Leave a Google review', 'Maybe later']), O('Leave a Google review', '16:56'), I('Here is the link: <b>g.page/r/vineyardbiketours/review</b><br>Thank you for your support!', '16:56')]],
+    ['Thank-you and opt-out', [I('Booking ref <b>VB-2026-0214</b> is complete. We’ll only message you about this tour. Reply <b>STOP</b> any time to stop feedback messages.', '16:57'), btns(['Book another tour', 'Stop messages'])]],
+    ['Unhappy score', [chip('Sat 14/11/2026 · another customer'), I('Hi Emma 👋 Thanks for riding with <b>Vineyard Bike Tours</b> today. How was your experience? (1–5)', '16:45'), O('2', '17:10'), I('I’m really sorry to hear that. What went wrong?', '17:10'), btns(['Bikes or equipment', 'Timing', 'The guide', 'Something else'])]],
+    ['Apology and alert', [O('Bikes or equipment. Ours only arrived 40 minutes late and the brakes felt loose', '17:12'), I('Thank you for telling us, Emma. That is not the standard we aim for. I’ve passed this chat to our manager, Karabo, who will contact you personally.', '17:12'), chip('Manager alerted with the full chat'), I('You are also welcome to share your experience publicly on Google or Hellopeter if you wish.', '17:13')]],
+    ['Manager follow-up', [chip('Sun 15/11/2026'), I('Hi Emma, it’s Karabo, the manager at <b>Vineyard Bike Tours</b>. I’m sorry about the late bikes. We’ve serviced the brakes and I’d like to offer you a free half-day ride (ref VB-2026-0231). Can I call you at 10:00?', '09:20'), O('Yes please, 10:00 is fine', '09:35'), chip('Call completed · 10:12'), I('Thanks for your time, Emma. Would you be happy to update your score now that we have made it right?', '10:20'), btns(['Update my score', 'No thanks']), O('Update my score', '10:24'), I('Thank you! Updated to 4 out of 5. Reply <b>STOP</b> any time to stop these messages.', '10:24')]],
+  ];
+  const phone = ([title, msgs], i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px;align-self:center"><div style="width:32px;height:32px;border-radius:50%;background:${T.head};color:#fff;font-weight:600;font-size:16px;display:flex;align-items:center;justify-content:center">${i + 1}</div><div style="font-family:${SERIF};font-weight:600;font-size:24px;color:${T.head}">${title}</div></div>
+    <div style="position:relative;width:300px;height:620px;border-radius:48px;background:linear-gradient(145deg,#2e2e2e,#0a0a0a 60%,#1c1c1c);padding:9px;box-sizing:border-box;box-shadow:0 0 0 1.5px #3a3a3a inset,0 18px 36px rgba(0,0,0,.35)">
+      <div style="position:absolute;left:-3px;top:110px;width:3px;height:30px;background:#1a1a1a;border-radius:2px 0 0 2px"></div><div style="position:absolute;left:-3px;top:160px;width:3px;height:52px;background:#1a1a1a;border-radius:2px 0 0 2px"></div><div style="position:absolute;right:-3px;top:170px;width:3px;height:76px;background:#1a1a1a;border-radius:0 2px 2px 0"></div>
+      <div style="position:relative;width:100%;height:100%;border-radius:40px;overflow:hidden;background:${T.bg};display:flex;flex-direction:column">
+        <div style="background:${T.head};color:#fff;padding:10px 20px 8px;flex:none"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;padding:0 6px"><span>9:41</span><span style="letter-spacing:2px">▂▄▆ ▮</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:20px"><span style="font-size:16px">‹</span><div style="width:30px;height:30px;border-radius:50%;background:${T.green};display:flex;align-items:center;justify-content:center;font-size:14px">⭐</div><div style="line-height:1.2"><div style="font-size:12.5px;font-weight:600">Vineyard Bike Tours <span style="color:${T.green}">✔</span></div><div style="font-size:9.5px;opacity:.8">Business account</div></div></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;padding:10px 8px;overflow:hidden;background-image:radial-gradient(rgba(7,94,84,.07) 1px,transparent 1px);background-size:14px 14px">${msgs.join('')}</div>
+        <div style="flex:none;display:flex;align-items:center;gap:6px;padding:6px 8px 20px;background:${T.bg}"><div style="flex:1;background:#fff;border-radius:18px;padding:7px 12px;font-size:11px;color:${T.mute}">Message</div><div style="width:30px;height:30px;border-radius:50%;background:${T.teal};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px">🎤</div></div>
+        <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:100px;height:4px;border-radius:2px;background:#111"></div>
+        <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:84px;height:24px;border-radius:14px;background:#000"></div>
+      </div></div></div>`;
+  return `<div class="page">
+    <div style="font-family:${SERIF};font-weight:600;color:${T.head}" class="h1">Customer Journey – WhatsApp Feedback</div>
+    <div style="font-family:${SERIF};font-style:italic;margin-top:6px" class="sub">Vineyard Bike Tours · The eight steps as the customer sees them</div>
+    <div style="height:1px;background:${T.teal};margin:24px 0 36px"></div>
+    <div class="grid">${steps.map(phone).join('')}</div></div>`;
+}
+
+
+document.getElementById('root').innerHTML = buildPhones();
+</script>
+</body>
+</html>

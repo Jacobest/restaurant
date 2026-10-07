@@ -1,0 +1,121 @@
+import { reviews, crm, handover } from '../requirements.mjs';
+
+export default {
+  meta: {
+    slug: 'feedback-reviews',
+    name: 'Feedback and Reviews',
+    label: 'Feedback',
+    emoji: '⭐',
+    biz: 'Vineyard Bike Tours',
+    who: 'customer',
+    journeyTitle: 'Customer Journey – WhatsApp Feedback',
+    lead: 'After every tour the bot asks for a quick 1–5 rating on WhatsApp. Happy customers are asked what went well and can leave a Google review; unhappy customers get an apology and a personal follow-up from the manager.',
+    grad: '#075E54,#25D366',
+    icon: '<path d="M60 14l13 28 31 4-23 21 6 31-27-16-27 16 6-31-23-21 31-4z"/>',
+    card: 'After the tour the bot asks for a 1–5 rating, sends happy guests to Google and alerts a manager about unhappy ones.',
+    active: 'Naledi Khumalo',
+    contacts: [
+      ['Thabo Mokoena', '12 min ago', 'Rated 5. Thanks for the review link!'],
+      ['Emma Clarke', '1 hour ago', 'Rated 2. Manager has been alerted'],
+      ['Pieter Botha', 'Yesterday', 'Great day out, thank you'],
+      ['Aisha Patel', 'Sep 29, 2026', 'STOP'],
+    ],
+    summary: [
+      'Tour finished. Feedback request sent.',
+      'Customer rated the tour 5 out of 5.',
+      'Liked the guide and the wine tasting stop.',
+      'Google review link sent. Review is optional.',
+      'Thank-you sent with an opt-out option.',
+      'Second customer rated the tour 2 out of 5.',
+      'Said the bikes were late. Manager alerted with the chat.',
+      'Manager phoned and offered a fix. Customer agreed to update the score.',
+    ],
+  },
+
+  chat: `  const steps = [
+    ['Feedback request', [chip('Sat 14/11/2026 · after the tour'), I('Hi Naledi 👋 Thanks for riding with <b>Vineyard Bike Tours</b> today. How was your experience? (1–5)', '16:45'), btns(['1', '2', '3', '4', '5'])]],
+    ['Happy score', [O('5', '16:52'), I('Wonderful, thank you! 🎉', '16:52')]],
+    ['What went well', [I('What did you enjoy most?', '16:52'), btns(['The guide', 'The wine tasting', 'The scenery', 'Something else']), O('The guide and the tasting stop 😍', '16:54'), I('So glad to hear it! We’ll tell Sipho.', '16:54')]],
+    ['Review link', [I('If you have a minute, a Google review helps other riders find us. It is completely optional ⭐', '16:55'), btns(['Leave a Google review', 'Maybe later']), O('Leave a Google review', '16:56'), I('Here is the link: <b>g.page/r/vineyardbiketours/review</b><br>Thank you for your support!', '16:56')]],
+    ['Thank-you and opt-out', [I('Booking ref <b>VB-2026-0214</b> is complete. We’ll only message you about this tour. Reply <b>STOP</b> any time to stop feedback messages.', '16:57'), btns(['Book another tour', 'Stop messages'])]],
+    ['Unhappy score', [chip('Sat 14/11/2026 · another customer'), I('Hi Emma 👋 Thanks for riding with <b>Vineyard Bike Tours</b> today. How was your experience? (1–5)', '16:45'), O('2', '17:10'), I('I’m really sorry to hear that. What went wrong?', '17:10'), btns(['Bikes or equipment', 'Timing', 'The guide', 'Something else'])]],
+    ['Apology and alert', [O('Bikes or equipment. Ours only arrived 40 minutes late and the brakes felt loose', '17:12'), I('Thank you for telling us, Emma. That is not the standard we aim for. I’ve passed this chat to our manager, Karabo, who will contact you personally.', '17:12'), chip('Manager alerted with the full chat'), I('You are also welcome to share your experience publicly on Google or Hellopeter if you wish.', '17:13')]],
+    ['Manager follow-up', [chip('Sun 15/11/2026'), I('Hi Emma, it’s Karabo, the manager at <b>Vineyard Bike Tours</b>. I’m sorry about the late bikes. We’ve serviced the brakes and I’d like to offer you a free half-day ride (ref VB-2026-0231). Can I call you at 10:00?', '09:20'), O('Yes please, 10:00 is fine', '09:35'), chip('Call completed · 10:12'), I('Thanks for your time, Emma. Would you be happy to update your score now that we have made it right?', '10:20'), btns(['Update my score', 'No thanks']), O('Update my score', '10:24'), I('Thank you! Updated to 4 out of 5. Reply <b>STOP</b> any time to stop these messages.', '10:24')]],
+  ];`,
+
+  journey: {
+    lanes: ['Customer (WhatsApp)', 'WhatsApp bot', 'Feedback systems', 'Manager'],
+    stages: [['Ask', 0, 3], ['Score', 4, 8], ['Unhappy', 9, 13], ['Close', 14, 15]],
+    nodes: [
+      ['p1', 0, 0, 'start', 'Finishes the\nbike tour'],
+      ['b1', 1, 1, 'step', 'Sends feedback\ntemplate (1–5)'],
+      ['p2', 2, 0, 'step', 'Replies with a\nscore'],
+      ['s1', 3, 2, 'system', 'Save score in\nsurvey sheet / CRM'],
+      ['d1', 4, 2, 'decision', 'Score 4–5\nor 1–3?'],
+      ['b2', 5, 1, 'step', 'Asks what\nwent well'],
+      ['p3', 6, 0, 'step', 'Shares what\nthey enjoyed'],
+      ['b3', 7, 1, 'step', 'Sends Google\nreview link'],
+      ['s2', 8, 2, 'system', 'Google Business\nProfile review page'],
+      ['b4', 9, 1, 'step', 'Apologises, asks\nwhat went wrong'],
+      ['p4', 10, 0, 'step', 'Explains the\nproblem'],
+      ['s3', 11, 2, 'system', 'Alert manager\nwith the chat'],
+      ['m1', 12, 3, 'human', 'Manager calls and\nputs it right'],
+      ['p5', 13, 0, 'step', 'Agrees to\nupdate the score'],
+      ['b5', 14, 1, 'step', 'Thank-you and\nSTOP opt-out line'],
+      ['e1', 15, 2, 'end', 'Score and notes\nsaved to CRM'],
+    ],
+    edges: [['p1', 'b1'], ['b1', 'p2'], ['p2', 's1'], ['s1', 'd1'], ['d1', 'b2', '4–5'], ['d1', 'b4', '1–3'], ['b2', 'p3'], ['p3', 'b3'], ['b3', 's2'], ['b4', 'p4'], ['p4', 's3'], ['s3', 'm1'], ['m1', 'p5'], ['p5', 'b5'], ['b5', 'e1']],
+  },
+
+  requirements: {
+    intro: 'The bot sends a rating request after each tour, saves the score, shares a Google review link and alerts a manager when someone is unhappy. Anyone may still review: routing unhappy customers to a manager is fine, hiding the review link from them is not.',
+    functions: [
+      {
+        fn: 'Feedback request message', why: 'Send the “How was your experience? (1–5)” message after the tour.',
+        easy: ['WhatsApp template message from S10U', 'A pre-approved template with 1–5 reply buttons, sent from a broadcast or the Workflow Builder. Confirm trigger options with S10U. ⚠'],
+        ideal: [['Automatic send from the booking system', 'Triggered when the tour is marked complete, through an API or Make/n8n/Zapier. Confirm with S10U. ⚠']],
+        note: 'Template messages are sent outside the 24-hour window, so the template must be approved by Meta first. Get permission to message customers (opt-in).',
+      },
+      {
+        fn: 'Score and answers capture', why: 'Save every score and comment so you can see trends.',
+        easy: ['Google Sheets', 'Free. One row per tour with date, score and comment. Linked through Make, n8n or Zapier.'],
+        ideal: [['Typeform or Tally survey', 'Longer surveys with reports. Tally has a free plan; check current limits. ⚠'], ['A CRM record', 'See the customer records row below.']],
+      },
+      {
+        fn: 'Google review link', why: 'Let happy customers leave a public Google review in one tap.',
+        easy: ['Google Business Profile “Share review form” link', 'Free. Copy the link from your Business Profile (Get more reviews) and send it in the chat or as a QR code.'],
+        ideal: [['Place ID review link', 'Build the link from your Place ID: search.google.com/local/writereview?placeid=... Same result, easy to add to every message.']],
+        note: 'Google forbids review gating: asking only happy customers for reviews or filtering out unhappy ones. Send the link to everyone who wants it. Do not offer rewards for reviews.',
+      },
+      {
+        fn: 'Reading and replying to Google reviews', why: 'Answer reviews quickly and see new ones in one place.',
+        easy: ['Reply in the Google Business Profile app', 'Free. Manual, but the owner or manager can do it in minutes.'],
+        ideal: [['Google Business Profile API', 'Lets software read and reply to reviews. Access needs Google approval, so apply early. ⚠']],
+      },
+      {
+        fn: 'Hellopeter (optional)', why: 'Invite customers to review you on South Africa’s best-known review site.',
+        easy: ['Hellopeter Review Invites', 'Hellopeter’s help pages list invites by email, SMS and Google. WhatsApp sending was not confirmed. ⚠'],
+        ideal: [['Hellopeter business plan with API', 'No public API documentation was found. Ask Hellopeter before promising an integration. ⚠']],
+        note: 'Hellopeter reviews are public and a business may respond. Pricing and plans were not verified. ⚠',
+      },
+      {
+        fn: 'Unhappy-customer alert', why: 'Tell the manager straight away, with the full chat.',
+        easy: ['Email or WhatsApp alert to the manager', 'Sent when the score is 1–3, through the S10U inbox or an automation tool (Make, n8n, Zapier). Confirm with S10U. ⚠'],
+        ideal: [['Ticket in a help desk or CRM task', 'The manager gets a task with a due time, so no complaint is missed.']],
+      },
+      crm('Keep scores, comments and follow-up notes against each customer.'),
+      {
+        fn: 'Compensation or goodwill', why: 'Let the manager offer a fix such as a free ride, and record it.',
+        easy: ['Manual voucher code', 'The manager types a code. Keep a simple list in Google Sheets.'],
+        ideal: [['Voucher in the booking system', 'Single-use codes that cannot be copied. Depends on the booking tool used. ⚠']],
+      },
+      handover,
+      {
+        fn: 'Opt-out and consent', why: 'Respect customers who do not want feedback messages.',
+        easy: ['STOP reply with automatic opt-out', 'S10U lists automatic opt-out handling for broadcasts. Confirm it covers template messages.'],
+        ideal: [['Consent list synced to the CRM', 'One list of who agreed to be messaged, checked before every send.']],
+        note: 'Under POPIA keep customer comments to what you need, say why you collect them and honour opt-outs. This is not legal advice.',
+      },
+    ],
+  },
+};

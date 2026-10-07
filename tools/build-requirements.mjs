@@ -3,8 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { USECASES } from './usecases.mjs';
-import { COMMON, REQS } from './requirements.mjs';
+import { USECASES, COMMON, REQS } from './all-cases.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -72,7 +71,7 @@ function page(u) {
   <p class="checked">Prepared ${COMMON.checked} for South African businesses. “Easy” means cheap or free and quick to set up. “Ideal” means the best fit as you grow. ⚠ means check with the vendor before promising it.</p>
 
   <h2>1. The basics for any WhatsApp AI chat</h2>
-  <div class="basics">${COMMON.basics.map(([t, d]) => `<div class="b"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>
+  <div class="basics">${COMMON.basics.map(([t, d]) => `<div class="b"><b>${esc(t)}</b><span>${esc(d.replace("{biz}", u.biz))}</span></div>`).join('')}</div>
 
   <h2>2. What S10U AI Studio gives you</h2>
   <div class="two">

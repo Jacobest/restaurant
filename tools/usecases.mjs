@@ -3,13 +3,19 @@
 export const USECASES = [
   {
     slug: 'restaurant-booking',
-    lead: "A guest books a table at Florentine’s Bistro using only WhatsApp. The bot collects the date, party size and dietary needs, checks availability, confirms the booking, sends reminders, and later handles the bill and a feedback request.", reference: true,
+    lead: "A guest books a table at Florentine’s Bistro using only WhatsApp. The bot collects the date, party size and dietary needs, checks availability, confirms the booking, sends reminders, and later handles the bill and a feedback request.",
+    grad: "#128C7E,#25D366",
+    icon: "<circle cx=\"60\" cy=\"64\" r=\"34\"/><circle cx=\"60\" cy=\"64\" r=\"22\" stroke-opacity=\".6\"/><path d=\"M16 20v26a8 8 0 0 0 8 8v46M24 20v22M32 20v26a8 8 0 0 1-8 8M104 20c-10 6-14 18-14 32h14v48\"/>",
+    card: "Guests reserve a table on WhatsApp: date, party size, dietary needs, pre-order, reminders, bill and feedback.", reference: true,
     name: 'Restaurant Booking', label: 'Restaurant', emoji: '🍷', biz: 'Florentine’s Bistro',
     who: 'guest', journeyTitle: 'Guest Journey – WhatsApp Reservations',
   },
   {
     slug: 'doctors-appointment',
     lead: "Patients book, change or cancel a visit in chat and get reminders before the appointment.",
+    grad: "#34B7F1,#53BDEB",
+    icon: "<rect x=\"20\" y=\"24\" width=\"80\" height=\"76\" rx=\"10\"/><path d=\"M40 14v20M80 14v20M20 50h80\"/><path d=\"M60 64v26M47 77h26\"/>",
+    card: "Patients book, change or cancel a visit in chat and get reminders before the appointment.",
     name: 'Doctor\'s Appointment', label: 'Doctor', emoji: '🩺', biz: 'Greenway Family Practice',
     who: 'patient', journeyTitle: 'Patient Journey – WhatsApp Appointments',
     active: 'Sarah van der Merwe',
@@ -34,6 +40,9 @@ export const USECASES = [
   {
     slug: 'customer-support',
     lead: "Customers get instant answers on WhatsApp. The bot handles common questions, looks up orders, starts returns, and hands over to a person when needed.",
+    grad: "#075E54,#128C7E",
+    icon: "<path d=\"M30 70V58a30 30 0 0 1 60 0v12\"/><rect x=\"24\" y=\"62\" width=\"12\" height=\"28\" rx=\"5\"/><rect x=\"84\" y=\"62\" width=\"12\" height=\"28\" rx=\"5\"/><path d=\"M90 90c0 10-10 16-30 16\"/>",
+    card: "Customers get instant answers, order tracking and returns in chat, with a smooth hand-over to a person.",
     name: 'Customer Support', label: 'Support', emoji: '🎧', biz: 'Urban Threads',
     who: 'customer', journeyTitle: 'Customer Journey – WhatsApp Support',
     active: 'Lindiwe Zulu',
@@ -56,6 +65,9 @@ export const USECASES = [
   {
     slug: 'lead-capture',
     lead: "A customer taps an ad and lands in a WhatsApp chat. The bot asks a few questions, scores the lead, books a call with an advisor and follows up.",
+    grad: "#34B7F1,#128C7E",
+    icon: "<path d=\"M20 24h80L68 62v32l-16 10V62z\"/>",
+    card: "An ad leads to a WhatsApp chat. The bot qualifies the lead, books a call and follows up.",
     name: 'Lead Capture', label: 'Lead', emoji: '📣', biz: 'SunPeak Energy',
     who: 'lead', journeyTitle: 'Lead Journey – WhatsApp Lead Capture',
     active: 'Thandi Mokoena',
@@ -79,6 +91,9 @@ export const USECASES = [
   {
     slug: 'salon-booking',
     lead: "Clients book a service with their favourite stylist on WhatsApp, pay a small deposit, get reminders and rebook after the visit.",
+    grad: "#53BDEB,#25D366",
+    icon: "<circle cx=\"36\" cy=\"88\" r=\"11\"/><circle cx=\"84\" cy=\"88\" r=\"11\"/><path d=\"M44 79 85 24M76 79 35 24\"/>",
+    card: "Clients pick a service, stylist and time, pay a deposit and get reminders, all in WhatsApp.",
     name: 'Salon Booking', label: 'Salon', emoji: '💇', biz: 'Studio Bloom',
     who: 'client', journeyTitle: 'Client Journey – WhatsApp Bookings',
     active: 'Naledi Khumalo',

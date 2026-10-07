@@ -5,7 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { USECASES } from './usecases.mjs';
+import { USECASES } from './all-cases.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
 const read = f => fs.readFileSync(ROOT + f, 'utf8');

@@ -3,8 +3,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { USECASES } from './usecases.mjs';
-import { JOURNEYS } from './journeys.mjs';
+import { USECASES } from './all-cases.mjs';
+import { JOURNEYS } from './all-cases.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
 const STYLE = {

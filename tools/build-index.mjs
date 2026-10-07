@@ -4,7 +4,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { USECASES } from './usecases.mjs';
+import { USECASES } from './all-cases.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');

@@ -6,7 +6,7 @@ export const COMMON = {
   basics: [
     ['A Meta Business account', 'The WhatsApp Business Platform sits under Meta. S10U is a Meta Business Partner (shown on its site).'],
     ['A phone number that is not already on WhatsApp', 'A dedicated number, ideally the number customers already know. Moving a number off the normal WhatsApp app needs care.'],
-    ['A business display name', 'For example “Florentine’s Bistro”. Meta checks it against your real brand.'],
+    ['A business display name', 'For example “{biz}”. Meta checks it against your real brand.'],
     ['Business verification (and a green tick, optional)', 'Meta verifies the business. The green tick is Meta’s decision, not guaranteed.'],
     ['Approved message templates', 'Free-form replies are allowed for 24 hours after the customer’s last message. Outside that window only pre-approved templates can be sent (reminders, rebooking nudges).'],
     ['Opt-in and opt-out', 'Get permission before you message first, and make stopping easy (S10U lists automatic opt-out handling).'],
@@ -47,28 +47,28 @@ export const COMMON = {
   ],
 };
 
-const reviews = {
+export const reviews = {
   fn: 'Reviews and reputation', why: 'Ask happy customers to review you right after the visit.',
   easy: ['Google Business Profile review link', 'Free. Send the link in WhatsApp or show it as a QR code.'],
   ideal: [['Google Business Profile API', 'Read and reply to reviews. Needs Google approval and quota. ⚠'], ['Hellopeter', 'The South African reputation standard. Check its business tools and API. ⚠']],
 };
-const crm = (why) => ({
+export const crm = (why) => ({
   fn: 'Customer records (CRM)', why,
   easy: ['HubSpot Free CRM', 'Best API and webhooks of the free options. Works with Zapier and Make. Billing is usually in USD or EUR.'],
   ideal: [['Zoho CRM', 'The cost-sensitive South African favourite: local presence, ZAR billing, API and connectors.'], ['HubSpot Starter or Pro', 'More automation when the team grows.'], ['Salesforce', 'For larger firms.']],
 });
-const payments = (why) => ({
+export const payments = (why) => ({
   fn: 'Payments', why,
   easy: ['Yoco payment links', 'No code. Money settles in South Africa. Send the link in WhatsApp.'],
   ideal: [['Paystack', 'Stripe-owned, launched in South Africa in 2021. API, webhooks, payment links, cards and bank transfer.'], ['Ozow', 'Instant EFT with an API.'], ['PayFast', 'Long-standing South African gateway with callbacks and plugins.'], ['Peach Payments', 'For larger merchants.']],
   note: 'Stripe itself is not generally open to South African businesses. S10U lists in-chat payment requests (cards, EFT, vouchers), so ask which gateways it supports. ⚠',
 });
-const accounting = {
+export const accounting = {
   fn: 'Accounting', why: 'Send sales and invoices to your books without retyping.',
   easy: ['Xero', 'Very popular with South African small businesses. ZAR, local bank feeds, open API and webhooks.'],
   ideal: [['Sage Business Cloud Accounting', 'South African-origin, with a REST API. (Sage 50 / Pastel on the desktop has weaker APIs.)'], ['QuickBooks Online or Zoho Books', 'Common alternatives.']],
 };
-const handover = {
+export const handover = {
   fn: 'Team hand-over and alerts', why: 'A person steps in when the bot cannot help.',
   easy: ['S10U inbox with agent hand-over', 'Stated on S10U’s site: assignment, escalation and the full chat history.'],
   ideal: [['Hand-over rules by hours and topic', 'Set who is on duty, and what the bot says outside opening hours.']],
