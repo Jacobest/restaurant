@@ -12,7 +12,7 @@ Never commit secrets. `.dev.vars` is git-ignored.
 4. **Journey diagram** (`flow.html`): swim lanes (customer, bot, systems, team).
 5. **What you need** (`requirements.html`): integrations with an Easy and an Ideal option per function, for South Africa. Facts from S10U's site are separated from "ask S10U" items.
 
-6. **Cost breakdown** (`cost.html`, optional, private, sales only): what WhatsApp costs message by message, who pays what, calculators. Built from `tools/costs.mjs` + `tools/pricing.mjs` by `build-costs.mjs`. Done for Doctor and Restaurant (add a use case by adding its entry to `tools/costs.mjs`: words, example numbers and which bot messages are templates). Needs a login and is never public. **Re-check `tools/pricing.mjs` against Meta's rate card every month.** Since 1 Oct 2026 Meta charges for the bot's replies inside the 24-hour window (service messages).
+6. **Cost breakdown** (`cost.html`, optional, private, sales only): what WhatsApp costs message by message, who pays what, calculators. Built from `tools/costs.mjs` + `tools/pricing.mjs` by `build-costs.mjs`. Done for Doctor, Restaurant and Salon (add a use case by adding its entry to `tools/costs.mjs`: words, example numbers and which bot messages are templates). Needs a login and is never public. **Re-check `tools/pricing.mjs` against Meta's rate card every month.** Since 1 Oct 2026 Meta charges for the bot's replies inside the 24-hour window (service messages).
 
 Each use case also has `index.html` (cards for the 5 demos) and a card on `uc/index.html`.
 Every demo shows the client's name (for example "Florentine's Bistro") and uses made-up but realistic data (names, references like FB-2026-0142). No `[Placeholders]`.

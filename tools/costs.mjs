@@ -27,6 +27,7 @@ export const COSTS = {
       'Add a short privacy notice and a “stop” option at booking. Get legal sign-off before going live. This is not legal advice.',
     ],
     startTip: 'Start with reminders. They cost one cheap template each and bring the clearest saving.',
+    moreCosts: 'Card fees on any booking fee paid by payment link (the payment gateway) are separate.',
   },
   'restaurant-booking': {
     who: 'guest', whoPlural: 'guests', bizNoun: 'restaurant', unit: 'booking',
@@ -54,5 +55,30 @@ export const COSTS = {
       'Offers and the anniversary invitation need the guest’s opt-in, and a “stop” option on every message. This is not legal advice.',
     ],
     startTip: 'Start with the booking reminders. They cost one cheap template each and fill tables that would sit empty.',
+    moreCosts: 'Card fees on the bill paid by payment link (the payment gateway) are separate.',
+  },
+  'salon-booking': {
+    who: 'client', whoPlural: 'clients', bizNoun: 'salon', unit: 'booking',
+    journeyText: 'Booking, deposit, a reminder, a late-arrival reply and the thank-you',
+    templateExample: 'a booking reminder',
+    windowNote: 'The first message from the client opens a 24-hour window. Inside it the bot replies freely, including the deposit link. The reminder the day before goes out after that window has closed, so it is an approved template. When the client answers, a new window opens: the 1-hour reminder, the late-arrival reply and the thank-you after the visit all fall inside it, so they are normal replies. A rebooking nudge weeks later would be a template again.',
+    templates: [
+      { step: 'Reminders', n: 0, kind: 'utility', label: 'Booking reminder, sent the day before (template)' },
+    ],
+    roi: {
+      fee: 970, feeLabel: 'Average value of a booking (rand) — example from the demo: R850 colour plus R120 blow-dry', nsLabel: 'Share of bookings that are no-shows or late cancellations today — example', nsDefault: 10,
+      redLabel: 'No-shows prevented by reminders and the deposit — example only', redDefault: 20,
+      note: 'S10U has not published a salon result. Its healthcare study reported 28% fewer missed consultations, which is a different business. Use the salon’s own estimate. ⚠ Not counted: rebooking messages and the time saved on answering messages one by one.',
+      lead: 'A reminder and a small deposit protect the stylist’s time. Try the salon’s own numbers. The starting value, no-show rate and reduction are examples, not facts.',
+      valueLabel: 'booking value recovered per month', meetingLine: 'one booking’s value',
+    },
+    privacyTitle: 'Privacy (POPIA)',
+    privacy: [
+      'Keep to what the stylist needs: name, number, service and time. Notes about allergies or skin conditions can be health information, so store only what is needed.',
+      'The salon is the responsible party. S10U, the AI provider and Meta are operators and need written agreements. Overseas AI is a cross-border transfer: tell clients.',
+      'Rebooking offers need the client’s opt-in, and a “stop” option on every message. This is not legal advice.',
+    ],
+    startTip: 'Start with reminders and a deposit. A cheap reminder and a small deposit protect the stylist’s time.',
+    moreCosts: 'Card fees on the R100 deposit (the payment gateway) are separate.',
   },
 };
