@@ -780,7 +780,99 @@ const vehicleJs = `
 })();
 `;
 
+// ---------------------------------------------------------------------------------------------
+// Event tickets: the Bookings tab. Ticket sales by type, plus the latest order.
+const eventCss = `
+  .xview .tlv{flex:1;min-width:0;display:flex;flex-direction:column;padding:0}
+  .stats{display:flex;gap:10px;margin-left:auto}
+  .stats span{background:#f0f1f6;border-radius:8px;padding:5px 12px;font-size:13px;color:#31365a}
+  .stats b{color:#0a3a9a}
+  .tkbox{flex:1;min-height:0;padding:14px 16px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+  .tkcard{border:1px solid #ececf3;border-radius:12px;padding:12px 14px}
+  .tkcard .top{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+  .tkcard .top b{font-size:15px}
+  .tkcard .top span{color:#7d7f8d;font-size:12.5px}
+  .tkbar{height:12px;border-radius:99px;background:#f0f1f6;margin:10px 0 6px;overflow:hidden}
+  .tkbar i{display:block;height:100%;border-radius:99px;transition:width .8s}
+  .tkcard.gen .tkbar i{background:#2d7ff0}.tkcard.vip .tkbar i{background:#7e57c2}
+  .tkcard .sub{display:flex;justify-content:space-between;font-size:12.5px;color:#4a4d5c}
+  .tkcard .sub .pct{font-weight:700;color:#0a3a9a}
+  .nextrow{display:flex;gap:10px;align-items:center;padding:9px 16px;border-bottom:1px solid #f0f0f5;font-size:13px}
+  .nextrow .tm{flex:none;width:52px;text-align:center;border-radius:8px;background:#f0f1f6;padding:6px 0;font-weight:700;font-size:13px}
+  .nextrow .tx{flex:1;min-width:0}.nextrow .tx span{display:block;color:#7d7f8d;font-size:12px}
+  .nextrow.nwrow{background:#eef3ff}
+  body:not(.booked) .nextrow.nwrow{display:none}
+`;
+
+const eventHtml = `        <div class="xview" id="v-bookings" hidden>
+          <div class="pane tlv">
+            <div class="cal-head">
+              <div class="cal-nav"><b style="min-width:0">Sunset Sessions 2026 · Sat 14/11/2026</b></div>
+              <div class="stats"><span><b id="stBk">0</b> tickets sold</span><span><b id="stRv">R0</b> sales</span><span>Gates <b>12:00</b></span></div>
+            </div>
+            <div class="tkbox">
+              <div class="tkcard gen"><div class="top"><b>General · R650</b><span id="gTxt"></span></div><div class="tkbar"><i id="gBar"></i></div><div class="sub"><span>Lawn, food market</span><span class="pct" id="gPct"></span></div></div>
+              <div class="tkcard vip"><div class="top"><b>VIP · R1 450</b><span id="vTxt"></span></div><div class="tkbar"><i id="vBar"></i></div><div class="sub"><span>Deck, private bar, fast entry</span><span class="pct" id="vPct"></span></div></div>
+            </div>
+          </div>
+          <div class="xside">
+            <div class="pane latest">
+              <div class="sh">Latest order <span class="badge new post">New · WhatsApp</span></div>
+              <div class="pre">No new order yet. The bot is still selling the tickets.</div>
+              <div class="body post">
+                <div class="who"><div class="av2">N</div><div><b>Naledi Khumalo</b><span>Ordered from the WhatsApp bot</span></div></div>
+                <div class="kv">
+                  <span>Tickets</span><b>2 x VIP</b>
+                  <span>Total</span><b>R2 900.00</b>
+                  <span>Payment</span><b>Paid, card or EFT</b>
+                  <span>Tickets sent</span><b>2 QR codes</b>
+                  <span>Reference</span><b>SSF-2026-0412</b>
+                  <span>Status</span><b><span class="badge ok" style="color:#12663a">Confirmed</span></b>
+                </div>
+                <ul class="tl"><li>Paid on WhatsApp</li><li>2 QR tickets delivered</li><li>Gate info due Fri 13/11 at 09:00</li><li>Feedback request after the event</li></ul>
+                <div class="btns2"><span class="pr">Open chat</span><span>Resend tickets</span></div>
+              </div>
+            </div>
+            <div class="pane prev">
+              <div class="sh">Latest orders <span class="badge gr" id="nextCount">0</span></div>
+              <div id="nextList"></div>
+            </div>
+          </div>
+        </div>`;
+
+const eventJs = `
+(function () {
+  // Sales so far. [buyer, ticket, count, time, isNew]
+  const CAP = { gen: 2000, vip: 250 }, BASE = { gen: 1612, vip: 186 }, PRICE = { gen: 650, vip: 1450 };
+  const ORD = [
+    ["T. Mokoena", "gen", 4, "17:42"], ["E. Clarke", "vip", 2, "17:10"], ["P. Botha", "gen", 2, "16:55"], ["A. Patel", "gen", 6, "16:31"], ["S. Ndlovu", "vip", 1, "15:48"],
+    ["Naledi Khumalo", "vip", 2, "19:08", true],
+  ];
+  const fmt = n => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, " ");
+  function draw() {
+    const booked = document.body.classList.contains("booked");
+    const n = { gen: BASE.gen, vip: BASE.vip + (booked ? 2 : 0) };
+    for (const [k, p] of [["gen", "g"], ["vip", "v"]]) {
+      document.getElementById(p + "Txt").textContent = fmt(n[k]) + " of " + fmt(CAP[k]) + " sold";
+      document.getElementById(p + "Bar").style.width = (n[k] / CAP[k] * 100).toFixed(1) + "%";
+      document.getElementById(p + "Pct").textContent = Math.round(n[k] / CAP[k] * 100) + "% sold";
+    }
+    document.getElementById("stBk").textContent = fmt(n.gen + n.vip);
+    document.getElementById("stRv").textContent = "R" + fmt(n.gen * PRICE.gen + n.vip * PRICE.vip);
+    const list = ORD.filter(o => booked || !o[4]).slice().sort((a, b) => b[3].localeCompare(a[3]));
+    document.getElementById("nextCount").textContent = list.length;
+    document.getElementById("nextList").innerHTML = list.map(o => '<div class="nextrow' + (o[4] ? " nwrow" : "") + '"><div class="tm">' + o[3] + '</div><div class="tx"><b>' + o[0] + "</b><span>" + o[2] + " x " + (o[1] === "vip" ? "VIP" : "General") + '</span></div><span class="badge ' + (o[4] ? "new" : "ok") + '" style="' + (o[4] ? "" : "color:#12663a") + '">' + (o[4] ? "New" : "Paid") + "</span></div>").join("");
+  }
+  draw();
+  // After the chat: show the new order in the sales and open the Bookings tab.
+  let timer;
+  window.__dash.onStart.push(() => { clearTimeout(timer); document.body.classList.remove("booked"); draw(); });
+  window.__dash.onEnd.push(() => { timer = setTimeout(() => { document.body.classList.add("booked"); draw(); window.__dash.setView("bookings"); }, 1800); });
+})();
+`;
+
 export const VIEWS = {
+  'event-tickets': { tab: 'bookings', css: eventCss, html: eventHtml, js: eventJs },
   'real-estate-viewing': { tab: 'bookings', css: propCss, html: propHtml, js: propJs },
   'hotel-guest-house': { tab: 'bookings', css: hotelCss, html: hotelHtml, js: hotelJs },
   'gym-classes': { tab: 'bookings', css: gymCss, html: gymHtml, js: gymJs },
