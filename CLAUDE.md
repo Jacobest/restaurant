@@ -12,7 +12,7 @@ Never commit secrets. `.dev.vars` is git-ignored.
 4. **Journey diagram** (`flow.html`): swim lanes (customer, bot, systems, team).
 5. **What you need** (`requirements.html`): integrations with an Easy and an Ideal option per function, for South Africa. Facts from S10U's site are separated from "ask S10U" items.
 
-6. **Cost breakdown** (`cost.html`, optional, private, sales only): what WhatsApp costs message by message, who pays what, calculators. Built from `tools/costs.mjs` + `tools/pricing.mjs` by `build-costs.mjs`. Done for Doctor, Restaurant, Salon, Lead Capture and Customer Support (add a use case by adding its entry to `tools/costs.mjs`: words, example numbers and which bot messages are templates). Needs a login and is never public. **Re-check `tools/pricing.mjs` against Meta's rate card every month.** Since 1 Oct 2026 Meta charges for the bot's replies inside the 24-hour window (service messages).
+6. **Cost breakdown** (`cost.html`, optional, private, sales only): what WhatsApp costs message by message, who pays what, calculators. Built from `tools/costs.mjs` + `tools/pricing.mjs` by `build-costs.mjs`. Done for all 18 use cases (the 13 newer ones are in `tools/costs-more.mjs`; add a use case by adding its entry to `tools/costs.mjs` or `tools/costs-more.mjs`: words, example numbers and which bot messages are templates). Needs a login and is never public. **Re-check `tools/pricing.mjs` against Meta's rate card every month.** Since 1 Oct 2026 Meta charges for the bot's replies inside the 24-hour window (service messages).
 
 Each use case also has `index.html` (cards for the 5 demos) and a card on `uc/index.html`.
 Every demo shows the client's name (for example "Florentine's Bistro") and uses made-up but realistic data (names, references like FB-2026-0142). No `[Placeholders]`.
@@ -38,4 +38,20 @@ Every demo shows the client's name (for example "Florentine's Bistro") and uses 
 
 - Plain, short words. Breadcrumbs and a Back button on every page. Favicon `/favicon.png?v=2`.
 - Brand: EngageONE. Header shows "<Use case> Demo" label.
-- Test locally with `python -m http.server` (static) or `npx wrangler pages dev . --kv USERS --compatibility-date 2026-08-01` (functions). Stop servers afterwards.
+- Test locally with `python -m http.server` (static) or `npx wrangler pages dev . --kv USERS --compatibility-date 2026-08-01` (functions). Stop servers afterwards. Kill stale `workerd`/python processes first (`netstat -ano | grep <port>`).
+
+## Gotchas (each cost time before)
+
+- **Bash mangles backslashes and regexes.** In `node -e '...'` any `\d`, `\s` or `/regex/` can break. Use the Edit tool for those lines. Long heredocs fail too: use the Write tool.
+- **Big template literals in `tools/build-*.mjs` drop single backslashes.** Write `\\d` and `\\B` inside the generated page's script. A built page's script must pass `new Function(script)`: check it after every build.
+- **Use unique CSS class names in dashboard views.** `.side` is already the phone frame's button (`position:absolute`), which put a side panel on top of the calendar. Use `xside`, `xview`.
+- **Generated pages are committed.** Always run `node tools/build-all.mjs` before `git commit`. Never commit `.claude/` (the repo is public).
+- **Browser pane:** when hidden, `clientWidth` is 0, screenshots time out and the IntersectionObserver auto-start does not run (click Play). Test phone layouts with `resize_window` (375 wide) and reset to `desktop` afterwards.
+- **No wrangler login in sessions.** KV namespaces, secrets and custom domains are done by the owner in the Cloudflare dashboard.
+- **Do not trust one summary of a web page.** WebFetch returns a model's summary. Meta's pricing page and its `.../pricing/non-template-messages` page disagreed in summaries. Cross-check, and mark anything unconfirmed with ⚠.
+
+## Domain and money facts
+
+- The site moved from `whatsapp-demo.app` to **demo.engageone.plus** because Chrome showed a red "Dangerous site" warning on `/invite/` (cause unconfirmed: probably the WhatsApp name and look-alike login page on a new domain). `whatsapp-demo.app` may still be attached to the Pages project. Do not put "WhatsApp" in a domain name.
+- **Meta pricing (checked 8 Oct 2026):** the business pays per delivered message. Messages a person sends are never charged. Since **1 Oct 2026** bot and agent replies inside the 24-hour window ("service messages") are charged too, at the utility rate for each market, and utility templates inside the window are charged. A chat started from a click-to-WhatsApp ad or page button is free for 72 hours (every message type). South African rates, the free allowance and the invoicing route are **unconfirmed**: they are marked ⚠ and live in `tools/pricing.mjs`. Never quote them as fact before Meta's USD rate card is checked.
+- **A window the customer opens lasts 24 hours.** A bot message sent after that window must be an approved template (utility cheap, marketing about 4x). When adding a cost card, read the message times in the chat to decide which bot messages are templates.

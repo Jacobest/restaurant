@@ -49,7 +49,7 @@ const pageFor = (u, cfg) => {
   const nService = count('service'), nUtility = count('utility'), nFeedback = count('feedback'), nMarketing = count('marketing');
   const nPerson = rows.filter(r => r.who === 'person').length, nBot = rows.length - nPerson;
   const W = cfg.who, Ws = cfg.whoPlural, Wc = cap(W), B = cfg.bizNoun, Bc = cap(B), U = cfg.unit, Uc = cap(U), R = cfg.roi;
-  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U, freeEntry: !!cfg.freeEntry, replyLabel: cfg.replyLabel || 'Bot replies' };
+  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U, freeEntry: !!cfg.freeEntry, replyLabel: cfg.replyLabel || 'Bot replies', units: cfg.unitsInDemo || 1, roiMode: (cfg.roi && cfg.roi.mode) || 'product' };
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -251,27 +251,29 @@ function render() {
     const cls = adMode() && r.who !== 'person' ? 'free' : r.type === 'feedback' && fbRate() === D.rates.marketing ? 'marketing' : r.type;
     html += '<tr><td class="idx">' + n + '</td><td><span class="who">' + (r.who === 'person' ? D.Who + ' writes' : r.who === 'agent' ? 'Agent replies' : 'Bot replies') + '</span>' + r.text.replace(/&/g, '&amp;').replace(/</g, '&lt;') + (r.label ? '<span class="who">' + r.label + '</span>' : '') + '</td><td><span class="badge b-' + cls + '">' + (adMode() && r.who !== 'person' ? 'Free (ad window)' : type) + '</span></td><td class="num usd">' + (u ? usd(u) : '—') + '</td><td class="num">' + (u ? zar(u * fx) : 'Free') + '</td></tr>';
   }
-  html += '<tr class="tot"><td class="idx"></td><td>Total for one ' + D.unit + ' (Meta fees, before VAT)</td><td></td><td class="num usd">' + usd(totUsd) + '</td><td class="num">' + zar(totUsd * fx) + '</td></tr>';
+  const Un = D.units || 1;
+  html += '<tr class="tot"><td class="idx"></td><td>' + (Un > 1 ? 'Total for the ' + Un + ' ' + D.unit + 's in this demo' : 'Total for one ' + D.unit) + ' (Meta fees, before VAT)</td><td></td><td class="num usd">' + usd(totUsd) + '</td><td class="num">' + zar(totUsd * fx) + '</td></tr>' +
+    (Un > 1 ? '<tr class="tot"><td class="idx"></td><td>Average per ' + D.unit + '</td><td></td><td class="num usd">' + usd(totUsd / Un) + '</td><td class="num">' + zar(totUsd / Un * fx) + '</td></tr>' : '');
   $('msgs').innerHTML = html;
-  $('s-tot').textContent = zar(totUsd * fx);
+  $('s-tot').textContent = zar(totUsd / (D.units || 1) * fx);
   if ($('adnote')) $('adnote').style.display = adMode() ? '' : 'none';
   // monthly
-  const conv = num('conv') || 1, vat = $('vat').checked ? 1 + D.vat : 1;
-  const svcAll = conv * D.nService, freeSvc = $('alw').checked ? Math.min(D.free, svcAll) : 0, svcBill = svcAll - freeSvc;
+  const conv = num('conv') || 1, cv = conv / (D.units || 1), vat = $('vat').checked ? 1 + D.vat : 1;
+  const svcAll = cv * D.nService, freeSvc = $('alw').checked ? Math.min(D.free, svcAll) : 0, svcBill = svcAll - freeSvc;
   const m0 = adMode() ? 0 : 1;
-  const l1 = m0 * svcBill * D.rates.service, l2 = m0 * conv * D.nUtility * D.rates.utility, l3 = m0 * conv * D.nFeedback * fbRate(), l4 = m0 * conv * D.nMarketing * D.rates.marketing;
+  const l1 = m0 * svcBill * D.rates.service, l2 = m0 * cv * D.nUtility * D.rates.utility, l3 = m0 * cv * D.nFeedback * fbRate(), l4 = m0 * cv * D.nMarketing * D.rates.marketing;
   const tot = (l1 + l2 + l3 + l4) * vat;
   $('m-zar').textContent = zar(tot * fx); $('m-per').textContent = zar(tot * fx / conv); $('m-usd').textContent = '$' + tot.toFixed(2);
-  const nf = x => x.toLocaleString('en-ZA');
+  const nf = x => Math.round(x).toLocaleString('en-ZA');
   $('m-lines').innerHTML =
     '<div><span>' + D.replyLabel + ': ' + nf(svcAll) + (freeSvc ? ' (' + nf(freeSvc) + ' free)' : '') + (adMode() ? ' (free in the ad window)' : '') + ' × ' + usd(D.rates.service) + '</span><b>' + zar(l1 * fx) + '</b></div>' +
-    (D.nUtility ? '<div><span>Reminder and notice templates: ' + nf(conv * D.nUtility) + ' × ' + usd(D.rates.utility) + '</span><b>' + zar(l2 * fx) + '</b></div>' : '') +
-    (D.nMarketing ? '<div><span>Marketing templates (offers, invitations): ' + nf(conv * D.nMarketing) + ' × ' + usd(D.rates.marketing) + '</span><b>' + zar(l4 * fx) + '</b></div>' : '') +
-    (D.nFeedback ? '<div><span>Feedback requests: ' + nf(conv * D.nFeedback) + ' × ' + usd(fbRate()) + '</span><b>' + zar(l3 * fx) + '</b></div>' : '') +
-    '<div><span>' + D.Who + ' messages: ' + nf(conv * D.rows.filter(r => r.who === 'person').length) + '</span><b>Free</b></div>' +
+    (D.nUtility ? '<div><span>Reminder and notice templates: ' + nf(cv * D.nUtility) + ' × ' + usd(D.rates.utility) + '</span><b>' + zar(l2 * fx) + '</b></div>' : '') +
+    (D.nMarketing ? '<div><span>Marketing templates (offers, invitations): ' + nf(cv * D.nMarketing) + ' × ' + usd(D.rates.marketing) + '</span><b>' + zar(l4 * fx) + '</b></div>' : '') +
+    (D.nFeedback ? '<div><span>Feedback requests: ' + nf(cv * D.nFeedback) + ' × ' + usd(fbRate()) + '</span><b>' + zar(l3 * fx) + '</b></div>' : '') +
+    '<div><span>' + D.Who + ' messages: ' + nf(cv * D.rows.filter(r => r.who === 'person').length) + '</span><b>Free</b></div>' +
     ($('vat').checked ? '<div><span>VAT 15%</span><b>' + zar((l1 + l2 + l3 + l4) * D.vat * fx) + '</b></div>' : '');
   // value
-  const prev = conv * (num('ns') / 100) * (num('red') / 100), val = prev * num('fee');
+  const share = D.roiMode === 'share', prev = share ? conv * (num('ns') / 100) : conv * (num('ns') / 100) * (num('red') / 100), val = share ? prev * (num('red') / 100) * num('fee') : prev * num('fee');
   $('v-prev').textContent = prev.toFixed(1); $('v-val').textContent = zar(val).replace('.00', '');
   $('v-cost').textContent = val ? Math.round(tot * fx / val * 100) + '%' : '—';
 }

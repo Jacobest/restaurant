@@ -3,7 +3,8 @@
 // the window). The person's own messages are always free.
 // templates: [{ step: step title, n: which bot message in that step (0 = first), kind: 'utility' | 'marketing' | 'feedback', label }]
 // 'feedback' is a survey template. Meta may review it as utility or as marketing, so the page has a switch. ⚠
-export const COSTS = {
+import { MORE } from './costs-more.mjs';
+const BASE_COSTS = {
   'doctors-appointment': {
     who: 'patient', whoPlural: 'patients', bizNoun: 'practice', unit: 'appointment',
     journeyText: 'Booking, reminder, change of time and follow-up',
@@ -133,3 +134,5 @@ export const COSTS = {
     moreCosts: 'Agent seats and any extra S10U licence fees are separate.',
   },
 };
+
+export const COSTS = { ...BASE_COSTS, ...MORE };
