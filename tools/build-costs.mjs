@@ -25,6 +25,7 @@ function rowsFor(slug, cfg) {
   const steps = new Function(helpers + '\n' + L.slice(a, b + 1).join('\n') + '\nreturn steps;')();
   const rows = [], used = new Set();
   for (const [title, msgs] of steps) {
+    if ((cfg.skipSteps || []).includes(title)) continue;
     let botN = 0;
     for (const m of msgs) {
       const k = kindOf(m);
@@ -47,7 +48,7 @@ const pageFor = (u, cfg) => {
   const nService = count('service'), nUtility = count('utility'), nFeedback = count('feedback'), nMarketing = count('marketing');
   const nPerson = rows.filter(r => r.who === 'person').length, nBot = rows.length - nPerson;
   const W = cfg.who, Ws = cfg.whoPlural, Wc = cap(W), B = cfg.bizNoun, Bc = cap(B), U = cfg.unit, Uc = cap(U), R = cfg.roi;
-  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U };
+  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U, freeEntry: !!cfg.freeEntry };
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -144,11 +145,14 @@ const pageFor = (u, cfg) => {
     <tr><th class="idx">#</th><th>Message</th><th>Type</th><th class="num usd">USD</th><th class="num">Rand</th></tr>
   </table></div>
   <div class="note">${esc(cfg.windowNote)}</div>
+  ${cfg.skipNote ? '<div class="note">' + esc(cfg.skipNote) + '</div>' : ''}
+  ${cfg.freeEntry ? '<div class="note" id="adnote" style="background:#D9FDD3;color:#075E54"><b>Started from an ad:</b> Meta does not charge for any message for 72 hours, as long as the ' + B + ' replies within 24 hours (phone app only, not WhatsApp Web). You pay for the ad itself, not for the chat. Switch the source above to see the normal prices.</div>' : ''}
 
   <h2>Monthly cost for the ${B}</h2>
   <div class="card">
     <div class="controls">
-      <label>${Uc}s booked on WhatsApp per month<input type="number" id="conv" value="300" min="1"></label>
+      <label>${esc(cfg.convLabel || (Uc + 's booked on WhatsApp per month'))}<input type="number" id="conv" value="300" min="1"></label>
+      ${cfg.freeEntry ? '<label>Where does the ' + W + ' start the chat?<select id="src"><option value="ad">From a Facebook or Instagram ad (free for 72 hours)</option><option value="link">From a link, QR code or website button</option></select></label>' : '<input type="hidden" id="src" value="link">'}
       <label>Rand per US dollar<input type="number" id="fx" value="${PRICING.fx}" step="0.05" min="1"></label>
       ${nFeedback ? '<label>Feedback request counts as<select id="fbk"><option value="utility">Utility (cheaper)</option><option value="marketing">Marketing (about 4× more)</option></select></label>' : '<input type="hidden" id="fbk" value="utility">'}
       <label class="chk"><input type="checkbox" id="alw"> Include the 1,000 free service messages a month ⚠ (not confirmed on Meta’s page)</label>
@@ -172,7 +176,7 @@ const pageFor = (u, cfg) => {
       <label>${esc(R.redLabel)}<input type="number" id="red" value="${R.redDefault}" min="0" max="100"></label>
     </div>
     <div class="result">
-      <div class="r"><b id="v-prev">0</b><span>no-shows prevented per month</span></div>
+      <div class="r"><b id="v-prev">0</b><span>${esc(R.prevLabel || 'no-shows prevented per month')}</span></div>
       <div class="r hi"><b id="v-val">R0</b><span>${esc(R.valueLabel)}</span></div>
       <div class="r"><b id="v-cost">0%</b><span>of that value goes to Meta fees</span></div>
     </div>
@@ -228,7 +232,8 @@ const zar = n => 'R' + n.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ' ');
 const usd = n => '$' + n.toFixed(4);
 const num = id => Math.max(0, parseFloat($(id).value) || 0);
 const fbRate = () => $('fbk').value === 'marketing' ? D.rates.marketing : D.rates.utility;
-function rate(type) { return type === 'free' ? 0 : type === 'service' ? D.rates.service : type === 'utility' ? D.rates.utility : type === 'marketing' ? D.rates.marketing : fbRate(); }
+const adMode = () => D.freeEntry && $('src').value === 'ad';
+function rate(type) { return type === 'free' || adMode() ? 0 : type === 'service' ? D.rates.service : type === 'utility' ? D.rates.utility : type === 'marketing' ? D.rates.marketing : fbRate(); }
 const LABEL = { free: 'Free', service: 'Service', utility: 'Utility template', marketing: 'Marketing template', feedback: 'Template' };
 function render() {
   const fx = num('fx') || D.fx;
@@ -242,21 +247,23 @@ function render() {
     if (r.step !== last) { html += '<tr class="step"><td colspan="5">' + r.step + '</td></tr>'; last = r.step; }
     n++; const u = rate(r.type); totUsd += u;
     const type = r.type === 'feedback' ? (fbRate() === D.rates.marketing ? 'Marketing template' : 'Utility template') : LABEL[r.type];
-    const cls = r.type === 'feedback' && fbRate() === D.rates.marketing ? 'marketing' : r.type;
-    html += '<tr><td class="idx">' + n + '</td><td><span class="who">' + (r.who === 'person' ? D.Who + ' writes' : 'Bot replies') + '</span>' + r.text.replace(/&/g, '&amp;').replace(/</g, '&lt;') + (r.label ? '<span class="who">' + r.label + '</span>' : '') + '</td><td><span class="badge b-' + cls + '">' + type + '</span></td><td class="num usd">' + (u ? usd(u) : '—') + '</td><td class="num">' + (u ? zar(u * fx) : 'Free') + '</td></tr>';
+    const cls = adMode() && r.who === 'bot' ? 'free' : r.type === 'feedback' && fbRate() === D.rates.marketing ? 'marketing' : r.type;
+    html += '<tr><td class="idx">' + n + '</td><td><span class="who">' + (r.who === 'person' ? D.Who + ' writes' : 'Bot replies') + '</span>' + r.text.replace(/&/g, '&amp;').replace(/</g, '&lt;') + (r.label ? '<span class="who">' + r.label + '</span>' : '') + '</td><td><span class="badge b-' + cls + '">' + (adMode() && r.who === 'bot' ? 'Free (ad window)' : type) + '</span></td><td class="num usd">' + (u ? usd(u) : '—') + '</td><td class="num">' + (u ? zar(u * fx) : 'Free') + '</td></tr>';
   }
   html += '<tr class="tot"><td class="idx"></td><td>Total for one ' + D.unit + ' (Meta fees, before VAT)</td><td></td><td class="num usd">' + usd(totUsd) + '</td><td class="num">' + zar(totUsd * fx) + '</td></tr>';
   $('msgs').innerHTML = html;
   $('s-tot').textContent = zar(totUsd * fx);
+  if ($('adnote')) $('adnote').style.display = adMode() ? '' : 'none';
   // monthly
   const conv = num('conv') || 1, vat = $('vat').checked ? 1 + D.vat : 1;
   const svcAll = conv * D.nService, freeSvc = $('alw').checked ? Math.min(D.free, svcAll) : 0, svcBill = svcAll - freeSvc;
-  const l1 = svcBill * D.rates.service, l2 = conv * D.nUtility * D.rates.utility, l3 = conv * D.nFeedback * fbRate(), l4 = conv * D.nMarketing * D.rates.marketing;
+  const m0 = adMode() ? 0 : 1;
+  const l1 = m0 * svcBill * D.rates.service, l2 = m0 * conv * D.nUtility * D.rates.utility, l3 = m0 * conv * D.nFeedback * fbRate(), l4 = m0 * conv * D.nMarketing * D.rates.marketing;
   const tot = (l1 + l2 + l3 + l4) * vat;
   $('m-zar').textContent = zar(tot * fx); $('m-per').textContent = zar(tot * fx / conv); $('m-usd').textContent = '$' + tot.toFixed(2);
   const nf = x => x.toLocaleString('en-ZA');
   $('m-lines').innerHTML =
-    '<div><span>Bot replies: ' + nf(svcAll) + (freeSvc ? ' (' + nf(freeSvc) + ' free)' : '') + ' × ' + usd(D.rates.service) + '</span><b>' + zar(l1 * fx) + '</b></div>' +
+    '<div><span>Bot replies: ' + nf(svcAll) + (freeSvc ? ' (' + nf(freeSvc) + ' free)' : '') + (adMode() ? ' (free in the ad window)' : '') + ' × ' + usd(D.rates.service) + '</span><b>' + zar(l1 * fx) + '</b></div>' +
     (D.nUtility ? '<div><span>Reminder and notice templates: ' + nf(conv * D.nUtility) + ' × ' + usd(D.rates.utility) + '</span><b>' + zar(l2 * fx) + '</b></div>' : '') +
     (D.nMarketing ? '<div><span>Marketing templates (offers, invitations): ' + nf(conv * D.nMarketing) + ' × ' + usd(D.rates.marketing) + '</span><b>' + zar(l4 * fx) + '</b></div>' : '') +
     (D.nFeedback ? '<div><span>Feedback requests: ' + nf(conv * D.nFeedback) + ' × ' + usd(fbRate()) + '</span><b>' + zar(l3 * fx) + '</b></div>' : '') +
