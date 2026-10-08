@@ -963,7 +963,101 @@ const takeawayJs = `
 })();
 `;
 
+// ---------------------------------------------------------------------------------------------
+// Delivery tracking: the Orders board. Parcel columns, plus the latest parcel.
+const courierCss = `
+  .xview .tlv{flex:1;min-width:0;display:flex;flex-direction:column;padding:0}
+  .stats{display:flex;gap:10px;margin-left:auto}
+  .stats span{background:#f0f1f6;border-radius:8px;padding:5px 12px;font-size:13px;color:#31365a}
+  .stats b{color:#0a3a9a}
+  .kbd{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 14px;overflow:hidden}
+  .kcol{background:#f6f7fb;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+  .kcol h4{margin:2px 4px 2px;font-size:12.5px;color:#4a4d5c;display:flex;justify-content:space-between}
+  .kcol h4 i{font-style:normal;background:#e3e5ef;border-radius:99px;padding:0 8px;font-size:11.5px}
+  .kcard{background:#fff;border-radius:8px;padding:8px 10px;font-size:12px;border-left:4px solid #2d7ff0;box-shadow:0 1px 2px rgba(0,0,0,.06);line-height:1.35}
+  .kcard b{display:block;font-size:12.5px}.kcard span{color:#7d7f8d}
+  .kcol.c2 .kcard{border-color:#f09a2a}.kcol.c3 .kcard{border-color:#7e57c2}.kcol.c4 .kcard{border-color:#2fa05b}
+  .kcard.nw{background:#0a3a9a;border-color:#6aa8ff;color:#fff;box-shadow:0 0 0 3px rgba(10,58,154,.2);animation:glow2 1.6s ease-in-out 3}
+  .kcard.nw span{color:#cfe0ff}
+  @keyframes glow2{50%{box-shadow:0 0 0 8px rgba(10,58,154,.07)}}
+  body:not(.booked) .kcard.nw{display:none}
+  .nextrow{display:flex;gap:10px;align-items:center;padding:9px 16px;border-bottom:1px solid #f0f0f5;font-size:13px}
+  .nextrow .tm{flex:none;width:52px;text-align:center;border-radius:8px;background:#f0f1f6;padding:6px 0;font-weight:700;font-size:13px}
+  .nextrow .tx{flex:1;min-width:0}.nextrow .tx span{display:block;color:#7d7f8d;font-size:12px}
+  .nextrow.nwrow{background:#eef3ff}
+  body:not(.booked) .nextrow.nwrow{display:none}
+`;
+
+const courierHtml = `        <div class="xview" id="v-orders" hidden>
+          <div class="pane tlv">
+            <div class="cal-head">
+              <div class="cal-nav"><b style="min-width:0">Parcel board · Wed 11/11/2026</b></div>
+              <div class="stats"><span><b id="stBk">0</b> parcels</span><span><b id="stRv">0</b> open issues</span><span>On time <b>94%</b></span></div>
+            </div>
+            <div class="kbd" id="kbd"></div>
+          </div>
+          <div class="xside">
+            <div class="pane latest">
+              <div class="sh">Latest parcel <span class="badge new post">New · WhatsApp</span></div>
+              <div class="pre">No new parcel yet. The bot is still helping the customer.</div>
+              <div class="body post">
+                <div class="who"><div class="av2">N</div><div><b>Naledi Khumalo</b><span>Tracked on WhatsApp</span></div></div>
+                <div class="kv">
+                  <span>Waybill</span><b>CC-2026-0412</b>
+                  <span>From</span><b>Karoo Outdoor Store</b>
+                  <span>To</span><b>14 Jacaranda Ave, Pretoria</b>
+                  <span>Window</span><b>16:00 – 18:00 (changed)</b>
+                  <span>Driver</span><b>Sipho</b>
+                  <span>Note</span><b>Leave with security</b>
+                  <span>Status</span><b><span class="badge ok" style="color:#12663a">Delivered 16:48</span></b>
+                  <span>Ticket</span><b>CC-T-0087 · Damaged item</b>
+                </div>
+                <ul class="tl"><li>Collected Mon 09/11 at 08:15</li><li>Slot changed to 16:00 – 18:00</li><li>Delivered 16:48 with photo and signature</li><li>Damage reported, support calls before 12:00 Thu</li></ul>
+                <div class="btns2"><span class="pr">Open chat</span><span>Call customer</span></div>
+              </div>
+            </div>
+            <div class="pane prev">
+              <div class="sh">Latest deliveries <span class="badge gr" id="nextCount">0</span></div>
+              <div id="nextList"></div>
+            </div>
+          </div>
+        </div>`;
+
+const courierJs = `
+(function () {
+  // [column, waybill, customer, detail, unused, time, isNew]
+  const COLS = ["In transit", "Out for delivery", "Delivered", "Issues"];
+  const OR = [
+    [0, "CC-2026-0420", "L. Zulu", "Cape Town to Durban", 0, "06:10"], [0, "CC-2026-0418", "E. Clarke", "Midrand to Pretoria", 0, "07:35"],
+    [1, "CC-2026-0415", "T. Mokoena", "7 stops before you", 0, "08:30"], [1, "CC-2026-0414", "A. Patel", "2 stops before you", 0, "11:05"],
+    [3, "CC-2026-0412", "Naledi Khumalo", "Damaged item · CC-T-0087", 0, "16:48", true],
+    [2, "CC-2026-0409", "P. Botha", "Signed by P. Botha · 13:20", 0, "13:20"], [2, "CC-2026-0408", "S. Ndlovu", "Safe place · 11:42", 0, "11:42"],
+    [3, "CC-2026-0399", "Z. Dube", "Missing item · CC-T-0085", 0, "10:15"],
+  ];
+  const fmt = n => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, " ");
+  function draw() {
+    const booked = document.body.classList.contains("booked");
+    const list = OR.filter(o => booked || !o[6]);
+    document.getElementById("kbd").innerHTML = COLS.map((c, i) => {
+      const items = list.filter(o => o[0] === i);
+      return '<div class="kcol c' + (i + 1) + '"><h4>' + c + "<i>" + items.length + "</i></h4>" + items.map(o => '<div class="kcard' + (o[6] ? " nw" : "") + '"><b>' + (o[6] ? "NEW  " : "") + o[1] + "</b>" + o[2] + "<br><span>" + o[3] + "</span></div>").join("") + "</div>";
+    }).join("");
+    document.getElementById("stBk").textContent = list.length;
+    document.getElementById("stRv").textContent = list.filter(o => o[0] === 3).length;
+    const rows = list.slice().sort((a, b) => b[5].localeCompare(a[5]));
+    document.getElementById("nextCount").textContent = rows.length;
+    document.getElementById("nextList").innerHTML = rows.slice(0, 5).map(o => '<div class="nextrow' + (o[6] ? " nwrow" : "") + '"><div class="tm">' + o[5] + '</div><div class="tx"><b>' + o[2] + "</b><span>" + o[3] + '</span></div><span class="badge ' + (o[6] ? "new" : "ok") + '" style="' + (o[6] ? "" : "color:#12663a") + '">' + (o[6] ? "New" : "Done") + "</span></div>").join("");
+  }
+  draw();
+  // After the chat: show the order on the board and open the Orders tab.
+  let timer;
+  window.__dash.onStart.push(() => { clearTimeout(timer); document.body.classList.remove("booked"); draw(); });
+  window.__dash.onEnd.push(() => { timer = setTimeout(() => { document.body.classList.add("booked"); draw(); window.__dash.setView("orders"); }, 1800); });
+})();
+`;
+
 export const VIEWS = {
+  'delivery-tracking': { tab: 'orders', css: courierCss, html: courierHtml, js: courierJs },
   'takeaway-order': { tab: 'orders', css: takeawayCss, html: takeawayHtml, js: takeawayJs },
   'event-tickets': { tab: 'bookings', css: eventCss, html: eventHtml, js: eventJs },
   'real-estate-viewing': { tab: 'bookings', css: propCss, html: propHtml, js: propJs },
