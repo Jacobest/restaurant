@@ -35,7 +35,8 @@ function rowsFor(slug, cfg) {
       const t = (cfg.templates || []).find(x => x.step === title && x.n === botN);
       if (t) used.add(t);
       botN++;
-      rows.push({ step: title, who: 'bot', text, type: t ? t.kind : 'service', label: t ? t.label : '' });
+      const agent = (cfg.agentMessages || []).some(x => x.step === title && x.n === botN - 1);
+      rows.push({ step: title, who: agent ? 'agent' : 'bot', text, type: t ? t.kind : 'service', label: t ? t.label : '' });
     }
   }
   for (const t of cfg.templates || []) if (!used.has(t)) throw new Error(`${slug}: template not found in the chat: ${t.step} #${t.n}`);
@@ -48,7 +49,7 @@ const pageFor = (u, cfg) => {
   const nService = count('service'), nUtility = count('utility'), nFeedback = count('feedback'), nMarketing = count('marketing');
   const nPerson = rows.filter(r => r.who === 'person').length, nBot = rows.length - nPerson;
   const W = cfg.who, Ws = cfg.whoPlural, Wc = cap(W), B = cfg.bizNoun, Bc = cap(B), U = cfg.unit, Uc = cap(U), R = cfg.roi;
-  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U, freeEntry: !!cfg.freeEntry };
+  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U, freeEntry: !!cfg.freeEntry, replyLabel: cfg.replyLabel || 'Bot replies' };
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -247,8 +248,8 @@ function render() {
     if (r.step !== last) { html += '<tr class="step"><td colspan="5">' + r.step + '</td></tr>'; last = r.step; }
     n++; const u = rate(r.type); totUsd += u;
     const type = r.type === 'feedback' ? (fbRate() === D.rates.marketing ? 'Marketing template' : 'Utility template') : LABEL[r.type];
-    const cls = adMode() && r.who === 'bot' ? 'free' : r.type === 'feedback' && fbRate() === D.rates.marketing ? 'marketing' : r.type;
-    html += '<tr><td class="idx">' + n + '</td><td><span class="who">' + (r.who === 'person' ? D.Who + ' writes' : 'Bot replies') + '</span>' + r.text.replace(/&/g, '&amp;').replace(/</g, '&lt;') + (r.label ? '<span class="who">' + r.label + '</span>' : '') + '</td><td><span class="badge b-' + cls + '">' + (adMode() && r.who === 'bot' ? 'Free (ad window)' : type) + '</span></td><td class="num usd">' + (u ? usd(u) : '—') + '</td><td class="num">' + (u ? zar(u * fx) : 'Free') + '</td></tr>';
+    const cls = adMode() && r.who !== 'person' ? 'free' : r.type === 'feedback' && fbRate() === D.rates.marketing ? 'marketing' : r.type;
+    html += '<tr><td class="idx">' + n + '</td><td><span class="who">' + (r.who === 'person' ? D.Who + ' writes' : r.who === 'agent' ? 'Agent replies' : 'Bot replies') + '</span>' + r.text.replace(/&/g, '&amp;').replace(/</g, '&lt;') + (r.label ? '<span class="who">' + r.label + '</span>' : '') + '</td><td><span class="badge b-' + cls + '">' + (adMode() && r.who !== 'person' ? 'Free (ad window)' : type) + '</span></td><td class="num usd">' + (u ? usd(u) : '—') + '</td><td class="num">' + (u ? zar(u * fx) : 'Free') + '</td></tr>';
   }
   html += '<tr class="tot"><td class="idx"></td><td>Total for one ' + D.unit + ' (Meta fees, before VAT)</td><td></td><td class="num usd">' + usd(totUsd) + '</td><td class="num">' + zar(totUsd * fx) + '</td></tr>';
   $('msgs').innerHTML = html;
@@ -263,7 +264,7 @@ function render() {
   $('m-zar').textContent = zar(tot * fx); $('m-per').textContent = zar(tot * fx / conv); $('m-usd').textContent = '$' + tot.toFixed(2);
   const nf = x => x.toLocaleString('en-ZA');
   $('m-lines').innerHTML =
-    '<div><span>Bot replies: ' + nf(svcAll) + (freeSvc ? ' (' + nf(freeSvc) + ' free)' : '') + (adMode() ? ' (free in the ad window)' : '') + ' × ' + usd(D.rates.service) + '</span><b>' + zar(l1 * fx) + '</b></div>' +
+    '<div><span>' + D.replyLabel + ': ' + nf(svcAll) + (freeSvc ? ' (' + nf(freeSvc) + ' free)' : '') + (adMode() ? ' (free in the ad window)' : '') + ' × ' + usd(D.rates.service) + '</span><b>' + zar(l1 * fx) + '</b></div>' +
     (D.nUtility ? '<div><span>Reminder and notice templates: ' + nf(conv * D.nUtility) + ' × ' + usd(D.rates.utility) + '</span><b>' + zar(l2 * fx) + '</b></div>' : '') +
     (D.nMarketing ? '<div><span>Marketing templates (offers, invitations): ' + nf(conv * D.nMarketing) + ' × ' + usd(D.rates.marketing) + '</span><b>' + zar(l4 * fx) + '</b></div>' : '') +
     (D.nFeedback ? '<div><span>Feedback requests: ' + nf(conv * D.nFeedback) + ' × ' + usd(fbRate()) + '</span><b>' + zar(l3 * fx) + '</b></div>' : '') +
