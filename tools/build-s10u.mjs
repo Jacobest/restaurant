@@ -90,7 +90,7 @@ const html = `<!DOCTYPE html>
   <h2>WhatsApp rules that affect every demo</h2>
   <p class="lead">From Meta’s official documentation, checked ${esc(CHECKED)}. S10U sits on top of these rules.</p>
   <div class="rules">${META_RULES.map(([t, d, u]) => `<div class="rule"><b>${esc(t)}</b><p>${esc(d)}</p>${u ? `<a href="${u}" target="_blank" rel="noopener">Meta source</a>` : ''}</div>`).join('')}</div>
-  <div class="warn">Rand prices you may see in news articles are conversions from Meta’s dollar rate card. One article says free service replies end on 1 October 2026. Meta’s own pricing page does not say that. Always check Meta’s current South Africa rate card before quoting a price.</div>
+  <div class="warn">Rand prices in news articles are conversions from Meta’s dollar rate card. Meta confirms that service replies stopped being free on 1 October 2026, so older articles and quotes that say “replies are free” are out of date. Whether a monthly free allowance applies (one source says 1,000 service messages per number) is not confirmed. Always check Meta’s current South Africa rate card before quoting a price.</div>
 
   <h2>Questions to ask S10U</h2>
   <div class="card"><ol class="q">${QUESTIONS.map(q => `<li>${esc(q)}</li>`).join('')}</ol></div>

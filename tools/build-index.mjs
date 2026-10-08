@@ -15,6 +15,8 @@ const DEMOS = u => [
   ['phones.html', 'Phone chat screens', 'Every step as a WhatsApp screen, side by side. Made for viewing on a phone.'],
   ['flow.html', u.slug === 'restaurant-booking' ? 'Guest journey diagram' : 'Journey diagram', 'The full flow in swim lanes: the customer, the bot, your systems and your team.'],
   ['requirements.html', 'What you need to make this work', 'Integrations and set-up, with an easy and an ideal option for each, for South African businesses.'],
+  // 6 (optional, private): the sales cost card, only when tools/costs.mjs has an entry for this use case
+  ...(fs.existsSync(ROOT + `uc/${u.slug}/cost.html`) ? [['cost.html', 'Cost breakdown (sales only)', 'What WhatsApp costs, message by message, who pays what, with calculators. Needs a login. Safe to screen-share.']] : []),
 ];
 
 for (const u of USECASES) {
