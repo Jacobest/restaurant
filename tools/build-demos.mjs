@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { USECASES } from './all-cases.mjs';
-import { VIEWS } from './dashboard-views.mjs';
+import { VIEWS, COMMON_CSS } from './dashboard-views.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
 const read = f => fs.readFileSync(ROOT + f, 'utf8');
@@ -16,7 +16,8 @@ const sub = (h, re, to, label) => { if (!re.test(h)) throw new Error('template c
 const WORDS = { 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten', 11: 'eleven', 12: 'twelve' };
 
 const REF = USECASES.find(u => u.reference);
-const refDash = read(`uc/${REF.slug}/dashboard-chat.html`);
+// The dashboard template is the restaurant's page without any extra view (tools/templates/).
+const refDash = read('tools/templates/dashboard-chat.template.html');
 const refPhones = read(`uc/${REF.slug}/phones.html`);
 
 // helpers + steps block of a chat page: from "function buildPhones() {" to "  ];"
@@ -28,6 +29,18 @@ function stepsBlock(html) {
   return { lines: L.slice(a + 1, b + 1), count: (L.slice(a + 1, b + 1).join('\n').match(/^    \['/gm) || []).length };
 }
 const crumbs = (u, last, extra = '') => `<nav class="crumbs" aria-label="Breadcrumb"${extra}><a class="back" href="/uc/${u.slug}/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/${u.slug}/">${u.name}</a> <span class="sep">›</span> <span class="cur">${last}</span></nav>`;
+
+// Add the optional extra tab view (shown after the chat) to a dashboard page.
+const addView = (d, view) => {
+  d = d.replace('<!--EXTRA_VIEWS-->', () => (view ? view.html : ''));
+  if (view) {
+    d = d.replace('</style>', () => COMMON_CSS + view.css + '</style>');
+    d = d.replace('</body>', () => '<script>' + view.js + '</script>\n</body>');
+  }
+  return d;
+};
+// The reference use case already has its own chat in the template, so only its view is added.
+write(`uc/${REF.slug}/dashboard-chat.html`, addView(refDash, VIEWS[REF.slug]));
 
 for (const u of USECASES.filter(x => !x.reference)) {
   const { lines, count } = stepsBlock(read(`uc/${u.slug}/chat.html`));
@@ -55,13 +68,7 @@ for (const u of USECASES.filter(x => !x.reference)) {
     ...u.contacts.map(([n, t, pv], i) => ct(n, t, pv, { dot: i < 2 })),
   ];
   d = sub(d, /<div class="ct on">[\s\S]*?(?=\n          <\/div>\n\n          <div class="pane chatp">)/, list.join('\n            '), 'contacts');
-  // optional extra tab view shown after the chat (for example the doctor's Appointments calendar)
-  const view = VIEWS[u.slug];
-  d = d.replace('<!--EXTRA_VIEWS-->', () => (view ? view.html : ''));
-  if (view) {
-    d = d.replace('</style>', () => view.css + '</style>');
-    d = d.replace('</body>', () => '<script>' + view.js + '</script>\n</body>');
-  }
+  d = addView(d, VIEWS[u.slug]);
   write(`uc/${u.slug}/dashboard-chat.html`, d);
 
   // ---------- static phone screens ----------

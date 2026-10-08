@@ -24,10 +24,11 @@ Every demo shows the client's name (for example "Florentine's Bistro") and uses 
 - `tools/requirements.mjs`: integration content. Re-check S10U (s10u.co.za) and South African tools before changing it.
 - `tools/s10u-facts.mjs` + `build-s10u.mjs` make `uc/s10u/` (what S10U publishes, with source and certainty for each fact, Meta rules, questions for S10U). Keep the "stated vs inferred vs not published" labels honest. S10U publishes integration categories only, no product names.
 - `tools/integrations.mjs` + `build-integrations.mjs` make `uc/integrations/` (master guide by tool type, easy vs ideal). Update it when S10U answers.
-- `tools/dashboard-views.mjs`: the screen the dashboard switches to when the chat ends (demo 2). Doctor: Appointments calendar (done). Every dashboard has a tab menu: Chats, Orders, Appointments, Contacts, Groups, Bookings. Other use cases still show only the inbox. Owner plan: add one view per use case, doctor first.
+- `tools/templates/dashboard-chat.template.html`: the dashboard page template (restaurant text, no extra view). Edit the dashboard here, never in `uc/*/dashboard-chat.html`.
+- `tools/dashboard-views.mjs`: the screen the dashboard switches to when the chat ends (demo 2). Done: Restaurant (Bookings timeline), Doctor (Appointments calendar). Every dashboard has a tab menu: Chats, Orders, Appointments, Contacts, Groups, Bookings. Other use cases still show only the inbox. Owner plan: add one view per use case.
 - `tools/cases/<slug>.mjs`: one file per newer use case (meta, chat, journey, requirements). Spec: `tools/cases/README.md`. Check one with `node tools/validate-case.mjs <slug>`. `tools/all-cases.mjs` merges everything (add the slug to its `ORDER` list).
 - Run everything with `node tools/build-all.mjs` (chats, dashboard + phones, journeys, requirements, index pages, and the cards on `uc/index.html`).
-- The restaurant is the reference: its `chat.html`, `dashboard-chat.html`, `phones.html` and `flow.html` are the templates/hand-made; the build scripts copy from them.
+- The restaurant is the reference: its `chat.html`, `phones.html` and `flow.html` are the templates/hand-made, and the dashboard template is in `tools/templates/`; the build scripts copy from them.
 - New use case: write `tools/cases/<slug>.mjs` following the README, add the slug to `ORDER` in `tools/all-cases.mjs`, validate, run `node tools/build-all.mjs`, test, commit.
 - Any `/uc/<name>/chat` and `/uc/<name>/dashboard-chat` page is public (see `functions/_middleware.js`). Everything else needs a login.
 
