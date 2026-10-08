@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { USECASES } from './all-cases.mjs';
+import { VIEWS } from './dashboard-views.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
 const read = f => fs.readFileSync(ROOT + f, 'utf8');
@@ -54,6 +55,13 @@ for (const u of USECASES.filter(x => !x.reference)) {
     ...u.contacts.map(([n, t, pv], i) => ct(n, t, pv, { dot: i < 2 })),
   ];
   d = sub(d, /<div class="ct on">[\s\S]*?(?=\n          <\/div>\n\n          <div class="pane chatp">)/, list.join('\n            '), 'contacts');
+  // optional extra tab view shown after the chat (for example the doctor's Appointments calendar)
+  const view = VIEWS[u.slug];
+  d = d.replace('<!--EXTRA_VIEWS-->', () => (view ? view.html : ''));
+  if (view) {
+    d = d.replace('</style>', () => view.css + '</style>');
+    d = d.replace('</body>', () => '<script>' + view.js + '</script>\n</body>');
+  }
   write(`uc/${u.slug}/dashboard-chat.html`, d);
 
   // ---------- static phone screens ----------

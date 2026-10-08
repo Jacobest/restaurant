@@ -39,6 +39,9 @@
   .nav svg{width:20px;height:20px;fill:#2d3252}
   .main{flex:1;min-width:0;padding:18px 22px 14px;display:flex;flex-direction:column}
   .main h1{display:flex;align-items:center;margin:0 0 14px;font-size:30px;font-weight:700;letter-spacing:-.01em}
+  .tabs span{cursor:pointer;position:relative}
+  .tabs span.on{font-weight:600;color:#0a3a9a}
+  .tabs span.on::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:2px;background:#0a3a9a}
   .tabs{display:flex;gap:30px;border-bottom:1px solid #e3e3ea;width:max-content;padding-bottom:10px;font-size:16px;color:#2a2a30;margin-bottom:16px}
   .tools{display:flex;gap:10px;align-items:center;margin-bottom:14px}
   .tools .btn{width:52px;height:38px;border-radius:12px;background:#f0f1f6;display:grid;place-items:center}
@@ -176,7 +179,7 @@
       </div>
       <div class="main">
         <h1>Inbox<span class="biz">Studio Bloom</span></h1>
-        <div class="tabs"><span>Chats</span><span>Orders</span><span>Appointments</span><span>Contacts</span><span>Groups</span></div>
+        <div class="tabs" id="tabs"><span data-tab="chats" class="on">Chats</span><span data-tab="orders">Orders</span><span data-tab="appointments">Appointments</span><span data-tab="contacts">Contacts</span><span data-tab="groups">Groups</span><span data-tab="bookings">Bookings</span></div>
         <div class="tools">
           <div class="btn f"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v7l-4 2v-9z"/></svg></div>
           <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="#555"><path d="M10 2a8 8 0 1 0 4.9 14.3l5 5 1.4-1.4-5-5A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"/></svg>Type name, email or phone, and press enter</div>
@@ -186,6 +189,7 @@
           <div class="btn d"><svg viewBox="0 0 24 24"><path d="M11 3h2v10l3-3 1.4 1.4L12 17l-5.4-5.6L8 10l3 3zM4 19h16v2H4z" fill="#0a3a9a"/></svg></div>
           <div class="btn"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 14H7zM9 3h6l1 2h4v2H4V5h4z"/></svg></div>
         </div>
+        
         <div class="panes">
           <div class="pane contacts">
             <div class="ph"><span class="cb"><i></i>Select All</span><svg class="gear" viewBox="0 0 24 24"><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.9 7.9 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1L11 21h4l.4-2.9a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></div>
@@ -245,6 +249,7 @@ fetch("/api/me").then(r => r.json()).then(d => {
   if (d.role) document.getElementById("crumbs").hidden = false;
   else { const a = document.querySelector("header.site a"); if (a) a.remove(); }
 }).catch(() => {});
+window.__dash = { onStart: [], onEnd: [], setView: () => {} };
 function loadSteps() {
   const T = { head: '#075E54', teal: '#128C7E', green: '#25D366', out: '#D9FDD3', bg: '#EFEAE2', ink: '#111B21', mute: '#667781', link: '#027EB5', tick: '#53BDEB' };
   const time = t => `<span style="float:right;margin:4px 0 0 8px;font-size:8.5px;color:${T.mute}">${t}</span>`;
@@ -351,10 +356,22 @@ addEventListener('resize', fit); fit();
       await sleep(it.kind === 'btn' ? 700 : 450);
       toBottom();
     }
-    if (id === run) { now.textContent = 'End of the journey · press Restart to watch again'; playBtn.textContent = '▶ Play'; paused = true; }
+    if (id === run) { now.textContent = 'End of the journey · press Restart to watch again'; playBtn.textContent = '▶ Play'; paused = true; window.__dash.onEnd.forEach(fn => fn()); }
   }
 
-  const begin = from => { started = true; paused = false; playBtn.textContent = '⏸ Pause'; play(from); };
+  // Tabs: Chats shows the inbox. Another tab shows its own view if this demo has one (id="v-<tab>").
+  const tabEls = [...document.querySelectorAll("#tabs span")];
+  function setView(name) {
+    const extra = document.getElementById("v-" + name);
+    if (name !== "chats" && !extra) return;
+    tabEls.forEach(t => t.classList.toggle("on", t.dataset.tab === name));
+    document.querySelectorAll(".xview").forEach(v => v.hidden = true);
+    document.querySelectorAll(".tools,.panes").forEach(e => e.style.display = name === "chats" ? "" : "none");
+    if (extra) extra.hidden = name === "chats";
+  }
+  window.__dash.setView = setView;
+  tabEls.forEach(t => t.onclick = () => setView(t.dataset.tab));
+  const begin = from => { started = true; paused = false; playBtn.textContent = '⏸ Pause'; setView("chats"); window.__dash.onStart.forEach(fn => fn()); play(from); };
   const firstOf = si => flat.findIndex(f => f.kind === 'step' && f.si === si);
   playBtn.onclick = () => { if (!started || pos >= flat.length) return begin(0); paused = !paused; playBtn.textContent = paused ? '▶ Play' : '⏸ Pause'; };
   $('restart').onclick = () => begin(0);
