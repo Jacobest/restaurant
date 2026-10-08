@@ -871,7 +871,100 @@ const eventJs = `
 })();
 `;
 
+// ---------------------------------------------------------------------------------------------
+// Takeaway: the Orders board. Kitchen columns, plus the latest order.
+const takeawayCss = `
+  .xview .tlv{flex:1;min-width:0;display:flex;flex-direction:column;padding:0}
+  .stats{display:flex;gap:10px;margin-left:auto}
+  .stats span{background:#f0f1f6;border-radius:8px;padding:5px 12px;font-size:13px;color:#31365a}
+  .stats b{color:#0a3a9a}
+  .kbd{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 14px;overflow:hidden}
+  .kcol{background:#f6f7fb;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+  .kcol h4{margin:2px 4px 2px;font-size:12.5px;color:#4a4d5c;display:flex;justify-content:space-between}
+  .kcol h4 i{font-style:normal;background:#e3e5ef;border-radius:99px;padding:0 8px;font-size:11.5px}
+  .kcard{background:#fff;border-radius:8px;padding:8px 10px;font-size:12px;border-left:4px solid #2d7ff0;box-shadow:0 1px 2px rgba(0,0,0,.06);line-height:1.35}
+  .kcard b{display:block;font-size:12.5px}.kcard span{color:#7d7f8d}
+  .kcol.c2 .kcard{border-color:#f09a2a}.kcol.c3 .kcard{border-color:#7e57c2}.kcol.c4 .kcard{border-color:#2fa05b}
+  .kcard.nw{background:#0a3a9a;border-color:#6aa8ff;color:#fff;box-shadow:0 0 0 3px rgba(10,58,154,.2);animation:glow2 1.6s ease-in-out 3}
+  .kcard.nw span{color:#cfe0ff}
+  @keyframes glow2{50%{box-shadow:0 0 0 8px rgba(10,58,154,.07)}}
+  body:not(.booked) .kcard.nw{display:none}
+  .nextrow{display:flex;gap:10px;align-items:center;padding:9px 16px;border-bottom:1px solid #f0f0f5;font-size:13px}
+  .nextrow .tm{flex:none;width:52px;text-align:center;border-radius:8px;background:#f0f1f6;padding:6px 0;font-weight:700;font-size:13px}
+  .nextrow .tx{flex:1;min-width:0}.nextrow .tx span{display:block;color:#7d7f8d;font-size:12px}
+  .nextrow.nwrow{background:#eef3ff}
+  body:not(.booked) .nextrow.nwrow{display:none}
+`;
+
+const takeawayHtml = `        <div class="xview" id="v-orders" hidden>
+          <div class="pane tlv">
+            <div class="cal-head">
+              <div class="cal-nav"><b style="min-width:0">Kitchen board · Today</b></div>
+              <div class="stats"><span><b id="stBk">0</b> orders</span><span><b id="stRv">R0</b> sales</span><span>Average <b>34 min</b></span></div>
+            </div>
+            <div class="kbd" id="kbd"></div>
+          </div>
+          <div class="xside">
+            <div class="pane latest">
+              <div class="sh">Latest order <span class="badge new post">New · WhatsApp</span></div>
+              <div class="pre">No new order yet. The bot is still taking the order.</div>
+              <div class="body post">
+                <div class="who"><div class="av2">S</div><div><b>Sipho Dlamini</b><span>Ordered from the WhatsApp bot</span></div></div>
+                <div class="kv">
+                  <span>Order</span><b>BB-2026-0412</b>
+                  <span>Items</span><b>Classic, chips, Coke</b>
+                  <span>Note</span><b>No onions, extra sauce</b>
+                  <span>Total</span><b>R174.00 paid</b>
+                  <span>Delivery</span><b>14 Protea Road, Table View</b>
+                  <span>Driver</span><b>Lwazi</b>
+                  <span>Status</span><b><span class="badge ok" style="color:#12663a">Delivered 19:41</span></b>
+                </div>
+                <ul class="tl"><li>Paid by link</li><li>Kitchen started 19:12</li><li>Out for delivery 19:28</li><li>Delivered 19:41, rated 5 out of 5</li></ul>
+                <div class="btns2"><span class="pr">Open chat</span><span>Refund</span></div>
+              </div>
+            </div>
+            <div class="pane prev">
+              <div class="sh">Latest orders <span class="badge gr" id="nextCount">0</span></div>
+              <div id="nextList"></div>
+            </div>
+          </div>
+        </div>`;
+
+const takeawayJs = `
+(function () {
+  // [column, order no, who, items, total, time, isNew]
+  const COLS = ["New", "Preparing", "Out for delivery", "Delivered"];
+  const OR = [
+    [0, "BB-2026-0415", "L. Zulu", "2 x Chicken Peri-Peri", 190, "19:52"],
+    [1, "BB-2026-0414", "E. Clarke", "Kota, chips", 140, "19:47"], [1, "BB-2026-0413", "T. Mokoena", "Double Boerie Stack", 144, "19:44"],
+    [2, "BB-2026-0411", "A. Patel", "3 x Classic, 3 x Coke", 360, "19:30"],
+    [3, "BB-2026-0412", "Sipho Dlamini", "Classic, chips, Coke", 174, "19:08", true],
+    [3, "BB-2026-0410", "P. Botha", "Wrap, Coke", 117, "18:58"], [3, "BB-2026-0409", "S. Ndlovu", "Double Boerie Stack", 144, "18:41"],
+  ];
+  const fmt = n => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, " ");
+  function draw() {
+    const booked = document.body.classList.contains("booked");
+    const list = OR.filter(o => booked || !o[6]);
+    document.getElementById("kbd").innerHTML = COLS.map((c, i) => {
+      const items = list.filter(o => o[0] === i);
+      return '<div class="kcol c' + (i + 1) + '"><h4>' + c + "<i>" + items.length + "</i></h4>" + items.map(o => '<div class="kcard' + (o[6] ? " nw" : "") + '"><b>' + (o[6] ? "NEW  " : "") + o[1] + "</b>" + o[2] + "<br><span>" + o[3] + " · R" + o[4] + "</span></div>").join("") + "</div>";
+    }).join("");
+    document.getElementById("stBk").textContent = list.length;
+    document.getElementById("stRv").textContent = "R" + fmt(list.reduce((n, o) => n + o[4], 0));
+    const rows = list.slice().sort((a, b) => b[5].localeCompare(a[5]));
+    document.getElementById("nextCount").textContent = rows.length;
+    document.getElementById("nextList").innerHTML = rows.slice(0, 5).map(o => '<div class="nextrow' + (o[6] ? " nwrow" : "") + '"><div class="tm">' + o[5] + '</div><div class="tx"><b>' + o[2] + "</b><span>" + o[3] + '</span></div><span class="badge ' + (o[6] ? "new" : "ok") + '" style="' + (o[6] ? "" : "color:#12663a") + '">' + (o[6] ? "New" : "Paid") + "</span></div>").join("");
+  }
+  draw();
+  // After the chat: show the order on the board and open the Orders tab.
+  let timer;
+  window.__dash.onStart.push(() => { clearTimeout(timer); document.body.classList.remove("booked"); draw(); });
+  window.__dash.onEnd.push(() => { timer = setTimeout(() => { document.body.classList.add("booked"); draw(); window.__dash.setView("orders"); }, 1800); });
+})();
+`;
+
 export const VIEWS = {
+  'takeaway-order': { tab: 'orders', css: takeawayCss, html: takeawayHtml, js: takeawayJs },
   'event-tickets': { tab: 'bookings', css: eventCss, html: eventHtml, js: eventJs },
   'real-estate-viewing': { tab: 'bookings', css: propCss, html: propHtml, js: propJs },
   'hotel-guest-house': { tab: 'bookings', css: hotelCss, html: hotelHtml, js: hotelJs },
