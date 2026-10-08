@@ -362,7 +362,112 @@ const salonJs = `
 })();
 `;
 
+// ---------------------------------------------------------------------------------------------
+// Vehicle service: the Bookings tab. A workshop-day timeline by technician, plus the latest booking.
+const vehicleCss = `
+  .xview .tlv{flex:1;min-width:0;display:flex;flex-direction:column;padding:0}
+  .stats{display:flex;gap:10px;margin-left:auto}
+  .stats span{background:#f0f1f6;border-radius:8px;padding:5px 12px;font-size:13px;color:#31365a}
+  .stats b{color:#0a3a9a}
+  .tlbox{flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 0 0}
+  .axis{display:grid;grid-template-columns:130px 1fr;border-bottom:1px solid #f0f0f5}
+  .axis .ticks{position:relative;height:30px}
+  .axis .ticks span{position:absolute;top:8px;transform:translateX(-50%);font-size:12px;color:#7d7f8d;font-weight:600}
+  .arow{display:grid;grid-template-columns:130px 1fr;border-bottom:1px solid #f0f0f5}
+  .alabel{padding:12px 14px;font-weight:600;font-size:14px;border-right:1px solid #f0f0f5}
+  .alabel small{display:block;font-weight:400;color:#7d7f8d;font-size:12px;margin-top:2px}
+  .track{position:relative;background-image:linear-gradient(to right,#f0f0f5 1px,transparent 1px);background-size:10% 100%}
+  .bk{position:absolute;height:48px;border-radius:8px;padding:5px 9px;font-size:12px;overflow:hidden;border-left:4px solid;line-height:1.3;white-space:nowrap;text-overflow:ellipsis}
+  .bk b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
+  .bk span{color:inherit;opacity:.8}
+  .bk.ler{background:#e5f1ff;border-color:#2d7ff0;color:#0a4aa8}
+  .bk.jad{background:#e3f6e6;border-color:#2fa05b;color:#12663a}
+  .bk.tha{background:#efe9fb;border-color:#7e57c2;color:#4a2f8a}
+  .bk.nw{background:#0a3a9a;border-color:#6aa8ff;color:#fff;box-shadow:0 0 0 3px rgba(10,58,154,.2);animation:glow2 1.6s ease-in-out 3;z-index:2}
+  @keyframes glow2{50%{box-shadow:0 0 0 8px rgba(10,58,154,.07)}}
+  body:not(.booked) .bk.nw{display:none}
+  .nextrow{display:flex;gap:10px;align-items:center;padding:9px 16px;border-bottom:1px solid #f0f0f5;font-size:13px}
+  .nextrow .tm{flex:none;width:52px;text-align:center;border-radius:8px;background:#f0f1f6;padding:6px 0;font-weight:700;font-size:13px}
+  .nextrow .tx{flex:1;min-width:0}.nextrow .tx span{display:block;color:#7d7f8d;font-size:12px}
+  .nextrow.nwrow{background:#eef3ff}
+  body:not(.booked) .nextrow.nwrow{display:none}
+`;
+
+const vehicleHtml = `        <div class="xview" id="v-bookings" hidden>
+          <div class="pane tlv">
+            <div class="cal-head">
+              <div class="cal-nav"><span class="bt">‹</span><b>Mon 16 November 2026</b><span class="bt">›</span><span class="today">Today</span></div>
+              <div class="stats"><span><b id="stBk">0</b> bookings</span><span><b id="stCv">0</b> technicians in</span><span>First drop-off <b id="stNx">07:00</b></span></div>
+              <div class="seg"><span class="on">Day</span><span>Week</span></div>
+              <div class="seg"><span class="on">Timeline</span><span>List</span></div>
+            </div>
+            <div class="tlbox"><div class="axis"><div></div><div class="ticks" id="ticks"></div></div><div id="areas"></div></div>
+          </div>
+          <div class="xside">
+            <div class="pane latest">
+              <div class="sh">Latest booking <span class="badge new post">New · WhatsApp</span></div>
+              <div class="pre">No new booking yet. The bot is still taking the booking.</div>
+              <div class="body post">
+                <div class="who"><div class="av2">S</div><div><b>Sipho Dlamini</b><span>Booked by the WhatsApp bot</span></div></div>
+                <div class="kv">
+                  <span>Drop-off</span><b>Mon 16/11/2026</b>
+                  <span>Time</span><b>07:30</b>
+                  <span>Vehicle</span><b>Corolla 2019</b>
+                  <span>Reg. no.</span><b>CA 123-456</b>
+                  <span>Service</span><b>Full service</b>
+                  <span>Estimate</span><b>R1 560.00</b>
+                  <span>Reference</span><b>KR-2026-0214</b>
+                  <span>Status</span><b><span class="badge ok" style="color:#12663a">Confirmed</span></b>
+                </div>
+                <ul class="tl"><li>Booked on WhatsApp</li><li>Reminder due Sun 15/11 at 17:00</li><li>Status updates on the day</li><li>Next-service reminder in 6 months</li></ul>
+                <div class="btns2"><span class="pr">Open chat</span><span>Send reminder</span></div>
+              </div>
+            </div>
+            <div class="pane prev">
+              <div class="sh">Drop-offs today <span class="badge gr" id="nextCount">0</span></div>
+              <div id="nextList"></div>
+            </div>
+          </div>
+        </div>`;
+
+const vehicleJs = `
+(function () {
+  // Monday 16 Nov 2026, 07:00 to 17:00. [technician, start hour, hours, client, job, isNew]
+  const START = 7, SPAN = 10;
+  const STY = [["ler", "Pieter", "Bay 1 · Services"], ["jad", "Themba", "Bay 2 · Services"], ["tha", "Lwazi", "Bay 3 · Tyres, brakes"]];
+  const BK = [
+    ["ler", 7, 3, "T. Mokoena", "Basic service"], ["ler", 10.5, 4, "E. Clarke", "Clutch replacement"],
+    ["jad", 7.5, 6.8, "Sipho Dlamini", "Full service + brake pads", true], ["jad", 14.5, 2, "A. Patel", "Basic service"],
+    ["tha", 7.5, 2, "M. Smith", "Tyres and balancing"], ["tha", 10, 1.5, "S. Ndlovu", "Wheel alignment"], ["tha", 12, 3, "Z. Dube", "Brake discs"],
+  ];
+  const fmt = h => { const m = Math.round((h % 1) * 60); return Math.floor(h) + ":" + (m < 10 ? "0" : "") + m; };
+  const pad = t => (t.length < 5 ? "0" + t : t);
+  document.getElementById("ticks").innerHTML = [8, 9, 10, 11, 12, 13, 14, 15, 16].map(h => '<span style="left:' + (h - START) / SPAN * 100 + '%">' + h + ":00</span>").join("");
+  document.getElementById("areas").innerHTML = STY.map(([k, name, role]) => {
+    const blocks = BK.filter(b => b[0] === k).map(([, s, d, who, svc, nw]) =>
+      '<div class="bk ' + k + (nw ? " nw" : "") + '" style="top:6px;left:' + (s - START) / SPAN * 100 + "%;width:calc(" + d / SPAN * 100 + '% - 4px)"><b>' + (nw ? "NEW  " : "") + who + "</b><span>" + fmt(s) + " · " + svc + "</span></div>").join("");
+    return '<div class="arow"><div class="alabel">' + name + "<small>" + role + '</small></div><div class="track" style="height:60px">' + blocks + "</div></div>";
+  }).join("");
+  function stats() {
+    const booked = document.body.classList.contains("booked");
+    const list = BK.filter(b => booked || !b[5]);
+    document.getElementById("stBk").textContent = list.length;
+    document.getElementById("stCv").textContent = new Set(list.map(b => b[0])).size;
+    document.getElementById("stNx").textContent = pad(fmt(Math.min(...list.map(b => b[1]))));
+    const next = list.slice().sort((a, b) => a[1] - b[1]).slice(0, 6);
+    document.getElementById("nextCount").textContent = list.length;
+    document.getElementById("nextList").innerHTML = next.map(b => '<div class="nextrow' + (b[5] ? " nwrow" : "") + '"><div class="tm">' + pad(fmt(b[1])) + '</div><div class="tx"><b>' + b[3] + "</b><span>" + STY.find(s => s[0] === b[0])[1] + " · " + b[4] + '</span></div><span class="badge ' + (b[5] ? "new" : "ok") + '" style="' + (b[5] ? "" : "color:#12663a") + '">' + (b[5] ? "New" : "Confirmed") + "</span></div>").join("");
+  }
+  stats();
+  // After the chat: show the booking on the timeline and open the Bookings tab.
+  let timer;
+  window.__dash.onStart.push(() => { clearTimeout(timer); document.body.classList.remove("booked"); stats(); });
+  window.__dash.onEnd.push(() => { timer = setTimeout(() => { document.body.classList.add("booked"); stats(); window.__dash.setView("bookings"); }, 1800); });
+})();
+`;
+
 export const VIEWS = {
+  'vehicle-service': { tab: 'bookings', css: vehicleCss, html: vehicleHtml, js: vehicleJs },
   'salon-booking': { tab: 'bookings', css: salonCss, html: salonHtml, js: salonJs },
   'restaurant-booking': { tab: 'bookings', css: restaurantCss, html: restaurantHtml, js: restaurantJs },
   'doctors-appointment': { tab: 'appointments', css: doctorCss, html: doctorHtml, js: doctorJs },
