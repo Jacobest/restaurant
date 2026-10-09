@@ -1056,7 +1056,116 @@ const courierJs = `
 })();
 `;
 
+// ---------------------------------------------------------------------------------------------
+// Aesthetic clinic, booking journey: the Appointments tab. Same calendar as the doctor, with the doctor and the cosmetologist.
+const clinicRep = (txt, pairs) => pairs.reduce((t, [x, y]) => { if (!t.includes(x)) throw new Error('clinic view: missing ' + x); return t.split(x).join(y); }, txt);
+const clinicHtml = (extra = []) => clinicRep(doctorHtml, [
+  ['Dr van Wyk</span><span><i style="background:#2fa05b"></i>Dr Naidoo', 'Dr Botha</span><span><i style="background:#2fa05b"></i>Thandi, cosmetologist'],
+  ['<div class="av2">S</div><div><b>Sarah van der Merwe</b>', '<div class="av2">N</div><div><b>Naledi Khumalo</b>'],
+  ['<b>Fri 20/11/2026</b>', '<b>Fri 20/11/2026</b>'],
+  ['<span>Doctor</span><b>Dr van Wyk</b>', '<span>With</span><b>Thandi Mokoena</b>'],
+  ['<span>Visit</span><b>General consultation</b>', '<span>Visit</span><b>Cosmetologist consultation</b>'],
+  ['<span>Payment</span><b>Private</b>', '<span>Client file</span><b>Matched by cell number</b>'],
+  ['GW-2026-0318', 'AC-2026-0214'],
+  ['<li>Booked on WhatsApp for Wed 18/11 at 10:30</li><li>Reminder sent on Tue 17/11</li><li>Patient moved it to Fri 20/11 at 11:00</li>', '<li>Asked for a doctor’s appointment</li><li>Chose the cosmetologist and tapped Fri 20/11 at 11:00</li><li>Accepted. Reminder due Thu 19/11 at 16:00</li>'],
+  ['Latest appointment', 'Latest appointment'],
+  ['<div class="tx">Follow-up visit<span>10:30 · Dr Naidoo</span>', '<div class="tx">Skin consultation<span>10:30 · Thandi</span>'],
+  ['General consultation<span>09:15 · Dr van Wyk</span>', 'Doctor review<span>09:15 · Dr Botha</span>'],
+  ['Vaccination<span>14:00 · Dr Naidoo</span>', 'Facial<span>14:00 · Thandi</span>'],
+  ...extra,
+]);
+const clinicJs = (extra = []) => clinicRep(doctorJs, [
+  ['put(11, 4, "10:30", "S. van der Merwe", "dn2 me");', 'put(11, 4, "10:30", "N. Khumalo", "dn2 me");'],
+  ['put(11, 18, "10:30", "S. van der Merwe → 20 Nov", "mv");\n', ''],
+  ['put(11, 20, "11:00", "NEW  S. van der Merwe", "nw");', 'put(11, 20, "11:00", "NEW  N. Khumalo · Thandi", "nw");'],
+  ...extra,
+]);
+
+const clinicMovedHtml = () => clinicRep(clinicHtml(), [
+  ['<span>Date</span><b>Fri 20/11/2026</b>', '<span>Was</span><b>Fri 20/11, 11:00</b>'],
+  ['<span>Time</span><b>11:00</b>', '<span>Now</span><b>Mon 23/11, 09:30</b>'],
+  ['<li>Asked for a doctor’s appointment</li><li>Chose the cosmetologist and tapped Fri 20/11 at 11:00</li><li>Accepted. Reminder due Thu 19/11 at 16:00</li>', '<li>Booked for Fri 20/11 at 11:00</li><li>Asked to reschedule on WhatsApp</li><li>Moved to Mon 23/11 at 09:30. Old slot released</li>'],
+  ['Latest appointment', 'Appointment moved'],
+  ['New · WhatsApp', 'Moved · WhatsApp'],
+  ['No new appointment yet. The bot is still taking the booking.', 'No change yet. The bot is still moving the booking.'],
+]);
+const clinicMovedJs = () => clinicRep(doctorJs, [
+  ['put(11, 4, "10:30", "S. van der Merwe", "dn2 me");', 'put(11, 4, "10:30", "N. Khumalo", "dn2 me");'],
+  ['put(11, 18, "10:30", "S. van der Merwe → 20 Nov", "mv");', 'put(11, 20, "11:00", "N. Khumalo → 23 Nov", "mv");'],
+  ['put(11, 20, "11:00", "NEW  S. van der Merwe", "nw");', 'put(11, 23, "09:30", "NEW  N. Khumalo · Thandi", "nw");'],
+]);
+
+// ---------------------------------------------------------------------------------------------
+// Aesthetic clinic, support journey: the Doctor Q&A queue. Uses the Bookings tab, renamed.
+const qaHtml = `        <div class="xview" id="v-bookings" hidden>
+          <div class="pane tlv">
+            <div class="cal-head">
+              <div class="cal-nav"><b style="min-width:0">Doctor Q&amp;A queue · Today</b></div>
+              <div class="stats"><span><b id="stBk">0</b> waiting</span><span><b id="stRv">0</b> answered today</span><span>Q&amp;A slot <b>13:00 to 13:30</b></span></div>
+            </div>
+            <div class="kbd" id="kbd" style="grid-template-columns:repeat(3,1fr)"></div>
+          </div>
+          <div class="xside">
+            <div class="pane latest">
+              <div class="sh">Latest question <span class="badge new post">New · WhatsApp</span></div>
+              <div class="pre">No new question yet. The assistant is still chatting.</div>
+              <div class="body post">
+                <div class="who"><div class="av2">N</div><div><b>Naledi Khumalo</b><span>Asked the AI assistant</span></div></div>
+                <div class="kv">
+                  <span>Question</span><b>Peel in the same week as laser?</b>
+                  <span>Asked</span><b>10:42</b>
+                  <span>Approved answer</span><b>None found</b>
+                  <span>Client file</span><b>Hydrating Facial, 04/11</b>
+                  <span>Answered by</span><b>Dr Botha, 13:12</b>
+                  <span>Status</span><b><span class="badge ok" style="color:#12663a">Answered</span></b>
+                </div>
+                <ul class="tl"><li>Not in the approved answers</li><li>Client told: answer 13:00 to 13:30</li><li>Dr Botha answered at 13:12</li><li>14:20 urgent message handed to reception</li></ul>
+                <div class="btns2"><span class="pr">Open chat</span><span>Add to approved answers</span></div>
+              </div>
+            </div>
+            <div class="pane prev">
+              <div class="sh">Latest activity <span class="badge gr" id="nextCount">0</span></div>
+              <div id="nextList"></div>
+            </div>
+          </div>
+        </div>`;
+
+const qaJs = `
+(function () {
+  const tab = document.querySelector('[data-tab="bookings"]'); if (tab) tab.textContent = "Doctor Q&A";
+  // [column, id, who, question, time, isNew]
+  const COLS = ["Waiting for Dr Botha", "Answered by Dr Botha", "Handed to reception"];
+  const QS = [
+    [0, "Q-0412", "A. Patel", "Serum and sunscreen together?", "10:05"], [0, "Q-0413", "Z. Dube", "Which cleanser after a peel?", "11:30"],
+    [1, "Q-0410", "E. Clarke", "How often can I exfoliate?", "09:48"], [1, "Q-0409", "S. Ndlovu", "Can I use the cream at night?", "09:20"],
+    [1, "Q-0414", "Naledi Khumalo", "Peel in the same week as laser?", "13:12", true],
+    [2, "Q-0411", "P. Botha", "Needs to change a booking today", "09:15"], [2, "Q-0415", "Naledi Khumalo", "Red and swollen skin · urgent", "14:20", true],
+  ];
+  function draw() {
+    const booked = document.body.classList.contains("booked");
+    const list = QS.filter(q => booked || !q[5]);
+    document.getElementById("kbd").innerHTML = COLS.map((c, i) => {
+      const items = list.filter(q => q[0] === i);
+      return '<div class="kcol c' + (i + 1) + '"><h4>' + c + "<i>" + items.length + "</i></h4>" + items.map(q => '<div class="kcard' + (q[5] ? " nw" : "") + '"><b>' + (q[5] ? "NEW  " : "") + q[1] + "</b>" + q[2] + "<br><span>" + q[3] + "</span></div>").join("") + "</div>";
+    }).join("");
+    document.getElementById("stBk").textContent = list.filter(q => q[0] === 0).length;
+    document.getElementById("stRv").textContent = list.filter(q => q[0] === 1).length;
+    const rows = list.slice().sort((a, b) => b[4].localeCompare(a[4]));
+    document.getElementById("nextCount").textContent = rows.length;
+    document.getElementById("nextList").innerHTML = rows.slice(0, 5).map(q => '<div class="nextrow' + (q[5] ? " nwrow" : "") + '"><div class="tm">' + q[4] + '</div><div class="tx"><b>' + q[2] + "</b><span>" + q[3] + '</span></div><span class="badge ' + (q[5] ? "new" : "ok") + '" style="' + (q[5] ? "" : "color:#12663a") + '">' + (q[0] === 2 ? "Reception" : q[0] === 0 ? "Waiting" : "Done") + "</span></div>").join("");
+  }
+  draw();
+  // After the chat: show the questions in the Doctor Q&A queue and open the tab.
+  let timer;
+  window.__dash.onStart.push(() => { clearTimeout(timer); document.body.classList.remove("booked"); draw(); });
+  window.__dash.onEnd.push(() => { timer = setTimeout(() => { document.body.classList.add("booked"); draw(); window.__dash.setView("bookings"); }, 1800); });
+})();
+`;
+
 export const VIEWS = {
+  'aesthetic-support': { tab: 'bookings', css: takeawayCss, html: qaHtml, js: qaJs },
+  'aesthetic-reschedule': { tab: 'appointments', css: doctorCss, html: clinicMovedHtml(), js: clinicMovedJs() },
+  'aesthetic-booking': { tab: 'appointments', css: doctorCss, html: clinicHtml(), js: clinicJs() },
   'delivery-tracking': { tab: 'orders', css: courierCss, html: courierHtml, js: courierJs },
   'takeaway-order': { tab: 'orders', css: takeawayCss, html: takeawayHtml, js: takeawayJs },
   'event-tickets': { tab: 'bookings', css: eventCss, html: eventHtml, js: eventJs },

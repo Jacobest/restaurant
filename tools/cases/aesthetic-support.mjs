@@ -1,0 +1,112 @@
+import { crm, handover } from '../requirements.mjs';
+
+export default {
+  meta: {
+    slug: 'aesthetic-support',
+    name: 'Aesthetic Clinic: Support',
+    label: 'Clinic',
+    emoji: '✨',
+    biz: 'Glow Aesthetic Clinic',
+    who: 'client',
+    journeyTitle: 'Client Journey – Support on WhatsApp (Chatbot + AI Agent)',
+    lead: 'Clients ask anything about their visit. A chatbot handles the fixed things (appointments, care protocols) and an AI agent answers from the clinic’s knowledge base. Product questions use doctor-approved answers only. If there is none, the question waits for the doctor, and anything urgent goes to reception.',
+    grad: '#128C7E,#53BDEB',
+    icon: '<path d="M16 28h88v52H56L34 98V80H16z"/><path d="M36 48h48M36 62h30"/>',
+    card: 'A chatbot and an AI agent answer clients. Product questions use doctor-approved answers. Urgent ones go to reception.',
+    active: 'Naledi Khumalo',
+    contacts: [
+      ['Thabo Mokoena', '12 min ago', 'Thanks, the PDF helped 👍'],
+      ['Emma Clarke', '1 hour ago', 'Can I use SPF over the serum?'],
+      ['Pieter Botha', 'Yesterday', 'When is my next appointment?'],
+      ['Aisha Patel', 'Sep 29, 2026', 'Thank you Dr Botha 💚'],
+    ],
+    summary: [
+      'Client has a few questions. Number matched to the client file. Menu shown.',
+      'Chatbot read the diary: next appointment Fri 20/11/2026 at 11:00 with Thandi.',
+      'AI agent found her treatment (Hydrating Facial, 04/11) and sent the doctor-approved care protocol PDF.',
+      'AI agent answered the parking and hours question from the clinic FAQ, with the source.',
+      'Product question matched a doctor-approved answer (approved 14/08/2026). Sent as written.',
+      'No approved answer for the peel and laser question. Added to Dr Botha’s Q&A list. Client told 13:00 to 13:30.',
+      'Dr Botha answered at 13:12. Answer sent to the client and saved on her file.',
+      'Red-flag words found. Handed to receptionist Zanele at once. Client asked for a photo for the doctor.',
+    ],
+  },
+
+  chat: `  const steps = [
+    ['Open the chat', [chip('Today'), O('Hi, I have a few questions', '10:30'), I('Hi Naledi 👋 Welcome to <b>Glow Aesthetic Clinic</b> ✨<br>I’m the clinic’s assistant. What do you need?', '10:30'), btns(['My appointments', 'How do I use it?', 'Ask a question', 'Talk to reception'])]],
+    ['My appointments', [O('When is my next appointment?', '10:31'), I('<b>Your next appointment</b>' + [['With', 'Thandi Mokoena'], ['When', 'Fri 20/11/2026, 11:00', true], ['Where', '12 Kloof Street, Gardens']].map(([a, b, bold]) => row(a, b, bold)).join(''), '10:31'), btns(['Reschedule', 'Cancel', 'All good'])]],
+    ['Care protocol (PDF)', [O('How do I use my serum?', '10:34'), I('From your file: <b>Hydrating Facial and Vitamin C serum</b> (04/11/2026, with Thandi). Here is your care protocol, approved by <b>Dr Botha</b> 👇', '10:34'), I('📄 <b>Care-protocol_Hydrating-Facial.pdf</b><br>2 pages · made for Naledi Khumalo', '10:34'), btns(['Thanks', 'Ask something else'])]],
+    ['Clinic question', [O('What are your Saturday hours? Is there parking?', '10:37'), I('Saturday: <b>08:30 to 13:00</b>. Free parking in the Kloof Street garage next door 🚗<br><i>Source: clinic FAQ, updated 01/10/2026</i>', '10:37'), btns(['👍 Helpful', 'Not quite'])]],
+    ['Doctor-approved answer', [O('Can I use the Vitamin C serum with my retinol?', '10:40'), I('<b>Dr Botha’s approved answer</b><br>Use the Vitamin C serum in the morning and the retinol at night. Wear sunscreen every day.<br><i>Approved 14/08/2026</i>', '10:40'), btns(['Thanks', 'Ask something else'])]],
+    ['Question for the doctor', [O('Can I book a peel in the same week as my laser session?', '10:42'), I('That one needs <b>Dr Botha</b>. I don’t want to guess ✋<br>I’ve added your question to her list. She answers questions daily from <b>13:00 to 13:30</b>, or sooner if she has an opening.', '10:42'), btns(['That’s fine', 'It’s urgent']), O('That’s fine', '10:43'), I('Great. I’ll message you here as soon as she answers.', '10:43')]],
+    ['Doctor answers', [chip('Today · 13:12'), I('👩‍⚕️ <b>Dr Botha answered your question</b><br>“Let’s plan the timing together. I’ve noted it on your file and we’ll talk about it at your visit on Fri 20/11.”', '13:12'), btns(['Thank you', 'Ask something else']), O('Thank you!', '13:15')]],
+    ['Urgent: reception', [chip('Today · 14:20'), O('My skin is very red and swollen after my treatment', '14:20'), I('I’m sorry to hear that. I’m passing this to our receptionist <b>right now</b> 📞<br>If this is an emergency, call 112.', '14:20'), chip('Receptionist Zanele joined the chat'), I('Hi Naledi, it’s Zanele from reception. Can you send me a photo? I’m showing Dr Botha now.', '14:22')]],
+  ];`,
+
+  journey: {
+    lanes: ['Client (WhatsApp)', 'Chatbot and AI agent', 'Clinic systems', 'Clinic team'],
+    stages: [['Menu and diary', 0, 3], ['Protocol and FAQ', 4, 7], ['Product questions', 8, 12], ['Urgent', 13, 15]],
+    nodes: [
+      ['c1', 0, 0, 'start', 'Client asks\na question'],
+      ['b1', 1, 1, 'step', 'Chatbot: menu or\nfree text, finds\nthe client'],
+      ['s1', 2, 2, 'system', 'Read the diary:\nnext appointment'],
+      ['b2', 3, 1, 'step', 'Shows My\nAppointments'],
+      ['s2', 4, 2, 'system', 'Find her treatment\nand its protocol PDF'],
+      ['b3', 5, 1, 'step', 'Sends the doctor-\napproved PDF'],
+      ['s3', 6, 2, 'system', 'AI agent searches\nthe knowledge base'],
+      ['b4', 7, 1, 'step', 'AI answers and\nshows the source'],
+      ['d1', 8, 2, 'decision', 'Approved answer\nfor this product?'],
+      ['b5', 9, 1, 'step', 'Sends the doctor-\napproved answer'],
+      ['s4', 9, 2, 'system', 'Add the question to\nthe doctor’s list'],
+      ['b6', 10, 1, 'step', 'Tells the client:\nanswer 13:00 to 13:30'],
+      ['t1', 11, 3, 'human', 'Doctor answers in\nher 13:00 slot or\nsooner'],
+      ['b7', 12, 1, 'step', 'Sends the\ndoctor’s answer'],
+      ['d2', 13, 2, 'decision', 'Urgent or a\nred-flag word?'],
+      ['t2', 14, 3, 'human', 'Receptionist takes\nover the chat'],
+      ['c2', 15, 0, 'end', 'Question solved'],
+    ],
+    edges: [['c1', 'b1'], ['b1', 's1', 'Next appointment?'], ['s1', 'b2'], ['b2', 's2', 'How do I use it?'], ['s2', 'b3'], ['b3', 's3', 'Another question'], ['s3', 'b4'], ['b4', 'd1', 'Product question'], ['d1', 'b5', 'Yes'], ['d1', 's4', 'No'], ['s4', 'b6'], ['b6', 't1'], ['t1', 'b7'], ['b7', 'd2'], ['d2', 't2', 'Yes'], ['d2', 'c2', 'No'], ['t2', 'c2']],
+  },
+
+  requirements: {
+    intro: 'This use case is a mix. A chatbot handles the fixed things, such as My Appointments and the menu. An AI agent understands free text and answers from the clinic’s own material. The AI must only use content the clinic has approved, and it must hand over to a person for anything it is not sure about. Health information is sensitive: plan the privacy side first.',
+    functions: [
+      {
+        fn: 'Clinic knowledge base (FAQ, hours, parking, policies)', why: 'The AI agent searches this to answer general questions and shows the source.',
+        easy: ['A short FAQ document the AI is trained on', 'Stated on S10U’s site: AI chatbots trained on FAQs with hand-over. Start with one page and add questions the bot could not answer.'],
+        ideal: [['A managed help centre or Notion page the AI reads', 'One place for staff to edit. Whether S10U can read it live is not published, so ask. ⚠']],
+      },
+      {
+        fn: 'Doctor-approved answers (product and aftercare)', why: 'The only source for product questions. The AI sends them as written and never invents advice.',
+        easy: ['A Google Sheet: question, approved answer, who approved it, date', 'The doctor signs off each row. The bot matches the client’s question to a row.'],
+        ideal: [['An approved-answers list inside the knowledge base, with an owner and a review date', 'Lets the clinic retire old answers. Needs support from the AI platform. ⚠']],
+        note: 'Aesthetic treatments are regulated. The demo shows no doses, no claims and no prices. Get the doctor and a lawyer to approve every answer before going live.',
+      },
+      {
+        fn: 'Care-protocol PDFs linked to the client', why: 'Finds the treatment on the client’s file and sends the matching protocol PDF.',
+        easy: ['A Google Drive folder, one PDF per treatment', 'The treatment on the client’s file decides which PDF is sent.'],
+        ideal: [['Documents stored in the clinic system and linked to the treatment', 'Best, because the protocol follows the treatment record. Needs an API. ⚠']],
+        note: 'Send a link or a PDF made for the client, not a public file. ' + 'Treatment records are special personal information.',
+      },
+      {
+        fn: 'Diary for My Appointments', why: 'Shows the client’s next appointment and offers Reschedule and Cancel.',
+        easy: ['Google Calendar, one calendar per person', 'Free. The bot looks the client up by cell number and reads the next event.'],
+        ideal: [['The booking diary inside the clinic system', 'Best, because everything stays in one place. Needs an API from the vendor. ⚠']],
+      },
+      {
+        fn: 'Doctor Q&A list and time slot', why: 'Holds questions the AI cannot answer until the doctor answers them, in a set slot or sooner.',
+        easy: ['A shared sheet or a tag in the S10U inbox', 'Stated on S10U’s site: shared inbox and hand-over. The doctor works through the list in the daily slot.'],
+        ideal: [['A queue with an owner, a due time and a reminder for the doctor', 'Keeps answers inside the promised time. Needs a workflow or automation tool. ⚠']],
+        note: 'Tell the client when to expect the answer. Save good answers to the approved list so the next client gets them at once.',
+      },
+      {
+        fn: 'Red-flag words and urgent hand-over', why: 'Words like swelling, pain or allergic reaction go to the receptionist at once, and the client is told to call 112 in an emergency.',
+        easy: ['A keyword rule in the S10U workflow', 'Stated on S10U’s site: Workflow Builder with routing and hand-over to an agent. The AI also checks its own confidence.'],
+        ideal: [['A rule plus an alert to the receptionist’s phone', 'Gets a person looking in minutes, not hours. ⚠']],
+        note: 'The bot must never try to treat or diagnose. It hands over and gives the emergency number.',
+      },
+      crm('Remembers each client, their treatments, questions and who answered them.'),
+      handover,
+    ],
+  },
+};

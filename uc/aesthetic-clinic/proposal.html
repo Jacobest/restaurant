@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/png" href="/favicon.png?v=2">
+<title>Ask for a proposal – EngageONE</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#EFEAE2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111B21}
+  header{background:#075E54;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+  header b{font-size:18px} header b span{color:#25D366}
+  .hl{display:flex;align-items:center;gap:14px}
+  .demo{font-size:18px;color:#D9FDD3;padding-left:14px;border-left:1px solid rgba(255,255,255,.35);white-space:nowrap}
+  .demo strong{font-weight:700;color:#fff}
+  .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:14px 24px;background:#fff;border-bottom:1px solid #d5e3dc;font-weight:600;font-size:17px;line-height:1.2}
+  .crumbs a{color:#075E54;text-decoration:none} .crumbs a:hover{text-decoration:underline}
+  .crumbs .back{background:#075E54;color:#fff;padding:8px 14px;border-radius:99px;font-size:15px;margin-right:6px}
+  .crumbs .sep{color:#8aa39b;font-weight:400} .crumbs .cur{color:#111B21}
+  main{max-width:900px;margin:0 auto;padding:32px 20px 40px}
+  h1{margin:0 0 8px;color:#075E54}
+  .lead{margin:0 0 28px;color:#444;line-height:1.6;max-width:680px}
+  .form{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(7,94,84,.14);padding:24px;display:grid;gap:16px;max-width:560px}
+  label{display:grid;gap:6px;font-weight:600;font-size:14.5px;color:#075E54}
+  input,textarea{font:inherit;font-weight:400;color:#111B21;border:1px solid #b8cfc5;border-radius:10px;padding:11px 12px;width:100%}
+  input:focus,textarea:focus{outline:2px solid #25D366;border-color:#25D366}
+  fieldset{border:1px solid #d5e3dc;border-radius:10px;padding:10px 14px;display:grid;gap:8px} legend{font-weight:600;font-size:14.5px;color:#075E54;padding:0 6px}
+  .chk{display:flex;align-items:center;gap:10px;font-weight:400;color:#111B21} .chk input{width:auto}
+  .go{display:inline-block;background:#25D366;color:#053b2f;font-weight:700;font-size:17px;border:0;text-decoration:none;text-align:center;border-radius:99px;padding:13px 26px;cursor:pointer}
+  .go:disabled{opacity:.6;cursor:default}
+  .err{background:#fdecea;color:#8a1c12;border-radius:10px;padding:10px 12px;font-size:14.5px}
+  .fine{margin:0;color:#667781;font-size:12.5px;line-height:1.4}
+  .done{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(7,94,84,.14);padding:28px 24px;max-width:560px} .done h2{margin:0 0 8px;color:#075E54} .done p{color:#444}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">Clinic <strong>Demo</strong></span></div></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/aesthetic-clinic/">‹ Back</a><a href="/uc/aesthetic-clinic/">Glow Aesthetic Clinic</a> <span class="sep">›</span> <span class="cur">Ask for a proposal</span></nav>
+<main>
+  <h1>Yes, this is for me!</h1>
+  <p class="lead">Tell us about your clinic and we will send you a proposal. We use these details only to contact you about it.</p>
+  <form id="f" class="form" novalidate>
+    <label>Clinic name<input name="clinic" maxlength="120" autocomplete="organization" required></label>
+    <label>Your name<input name="name" maxlength="120" autocomplete="name" required></label>
+    <label>Cell number<input name="cell" type="tel" maxlength="30" autocomplete="tel" required></label>
+    <label>Email<input name="email" type="email" maxlength="120" autocomplete="email" required></label>
+    <fieldset><legend>Which journeys are you interested in?</legend>
+      <label class="chk"><input type="checkbox" name="journeys" value="booking"> Book an appointment</label>
+      <label class="chk"><input type="checkbox" name="journeys" value="reschedule"> Reschedule an appointment</label>
+      <label class="chk"><input type="checkbox" name="journeys" value="support"> Support</label>
+    </fieldset>
+    <label>Anything else we should know? (optional)<textarea name="note" maxlength="1000" rows="3"></textarea></label>
+    <input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+    <div id="err" class="err" hidden></div>
+    <button type="submit" class="go" id="go">Send my request</button>
+    <p class="fine">Your details are personal information. They are stored so we can reply, and you can ask us to delete them at any time.</p>
+  </form>
+  <div id="done" class="done" hidden><h2>Thank you!</h2><p>We have your request and will be in touch soon.</p><a class="go" href="/uc/aesthetic-clinic/">Back to the journeys</a></div>
+</main>
+<script>
+(function () {
+  var f = document.getElementById('f'), err = document.getElementById('err'), go = document.getElementById('go');
+  var q = new URLSearchParams(location.search).get('journey');
+  var keys = ["booking","reschedule","support"];
+  [].forEach.call(f.querySelectorAll('input[name=journeys]'), function (c) { c.checked = !q || keys.indexOf(q) < 0 || c.value === q; });
+  f.addEventListener('submit', function (e) {
+    e.preventDefault(); err.hidden = true;
+    var d = new FormData(f);
+    var body = { clinic: d.get('clinic'), name: d.get('name'), cell: d.get('cell'), email: d.get('email'), note: d.get('note'), website: d.get('website'),
+      journeys: [].filter.call(f.querySelectorAll('input[name=journeys]'), function (c) { return c.checked; }).map(function (c) { return c.value; }) };
+    go.disabled = true; go.textContent = 'Sending…';
+    fetch('/api/proposal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) throw new Error(x.j.error || 'Something went wrong. Please try again.');
+        f.hidden = true; document.getElementById('done').hidden = false; window.scrollTo(0, 0);
+      })
+      .catch(function (e2) { err.textContent = e2.message; err.hidden = false; go.disabled = false; go.textContent = 'Send my request'; });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,64 +1,11 @@
-// Builds uc/<slug>/cost.html: the PRIVATE sales card with the WhatsApp message cost breakdown.
-// Needs an entry in tools/costs.mjs. It reads the use case's own chat, so the table matches the demo.
-// Run:  node tools/build-costs.mjs   (prices live in tools/pricing.mjs: re-check them every month)
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { USECASES } from './all-cases.mjs';
-import { COSTS } from './costs.mjs';
-import { PRICING } from './pricing.mjs';
-import { CLINIC } from './clinic.mjs';
-
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..') + path.sep;
-const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const cap = s => s[0].toUpperCase() + s.slice(1);
-
-// run the chat's own steps
-const tpl = fs.readFileSync(ROOT + 'uc/restaurant-booking/chat.html', 'utf8').split('\n');
-const ha = tpl.findIndex(l => l.startsWith('function buildPhones')), hb = tpl.findIndex(l => l.startsWith('  const steps = ['));
-const helpers = tpl.slice(ha + 1, hb).join('\n');
-const kindOf = h => h.includes('align-self:flex-end') ? 'out' : h.includes('max-width:80%') ? 'in' : h.includes('width:80%') ? 'btn' : h.includes('align-self:center') ? 'chip' : 'in';
-const plain = h => h.replace(/<br\s*\/?>/g, ' ').replace(/<\/div><div[^>]*>/g, ' | ').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').replace(/\s*\d{2}:\d{2}(\s*✓✓)?\s*$/, '').trim();
-
-function rowsFor(slug, cfg) {
-  const L = fs.readFileSync(ROOT + `uc/${slug}/chat.html`, 'utf8').split('\n');
-  const a = L.findIndex(l => l.startsWith('  const steps = [')), b = L.findIndex((l, i) => i > a && l === '  ];');
-  const steps = new Function(helpers + '\n' + L.slice(a, b + 1).join('\n') + '\nreturn steps;')();
-  const rows = [], used = new Set();
-  for (const [title, msgs] of steps) {
-    if ((cfg.skipSteps || []).includes(title)) continue;
-    let botN = 0;
-    for (const m of msgs) {
-      const k = kindOf(m);
-      if (k === 'btn' || k === 'chip') continue;
-      let text = plain(m); if (text.length > 96) text = text.slice(0, 93) + '…';
-      if (k === 'out') { rows.push({ step: title, who: 'person', text, type: 'free' }); continue; }
-      const t = (cfg.templates || []).find(x => x.step === title && x.n === botN);
-      if (t) used.add(t);
-      botN++;
-      const agent = (cfg.agentMessages || []).some(x => x.step === title && x.n === botN - 1);
-      rows.push({ step: title, who: agent ? 'agent' : 'bot', text, type: t ? t.kind : 'service', label: t ? t.label : '' });
-    }
-  }
-  for (const t of cfg.templates || []) if (!used.has(t)) throw new Error(`${slug}: template not found in the chat: ${t.step} #${t.n}`);
-  return rows;
-}
-
-const pageFor = (u, cfg) => {
-  const rows = rowsFor(u.slug, cfg);
-  const count = t => rows.filter(r => r.type === t).length;
-  const nService = count('service'), nUtility = count('utility'), nFeedback = count('feedback'), nMarketing = count('marketing');
-  const nPerson = rows.filter(r => r.who === 'person').length, nBot = rows.length - nPerson;
-  const W = cfg.who, Ws = cfg.whoPlural, Wc = cap(W), B = cfg.bizNoun, Bc = cap(B), U = cfg.unit, Uc = cap(U), R = cfg.roi;
-  const DATA = { rows, rates: PRICING.rates, fx: PRICING.fx, free: PRICING.freeServiceMessages, vat: PRICING.vat, nService, nUtility, nFeedback, nMarketing, Who: Wc, unit: U, freeEntry: !!cfg.freeEntry, replyLabel: cfg.replyLabel || 'Bot replies', units: cfg.unitsInDemo || 1, roiMode: (cfg.roi && cfg.roi.mode) || 'product' };
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="/favicon.png?v=2">
-<title>EngageONE – ${esc(u.name)}: cost breakdown (sales only)</title>
+<title>EngageONE – Aesthetic Clinic: Support: cost breakdown (sales only)</title>
 <style>
   *{box-sizing:border-box}
   body{margin:0;background:#EFEAE2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111B21;line-height:1.5}
@@ -116,121 +63,121 @@ const pageFor = (u, cfg) => {
 </style>
 </head>
 <body>
-<header class="site"><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">${esc(u.label)} <strong>Demo</strong></span></div><a href="/logout">Sign out</a></header>
-<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/${u.slug}/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/${u.slug}/">${esc(u.name)}</a> <span class="sep">›</span> <span class="cur">Cost breakdown</span></nav>
+<header class="site"><div class="hl"><b>Engage<span>ONE</span></b><span class="demo">Clinic <strong>Demo</strong></span></div><a href="/logout">Sign out</a></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a class="back" href="/uc/aesthetic-support/">‹ Back</a><a href="/uc/">Use cases</a> <span class="sep">›</span> <a href="/uc/aesthetic-support/">Aesthetic Clinic: Support</a> <span class="sep">›</span> <span class="cur">Cost breakdown</span></nav>
 <div class="private"><b>SALES ONLY</b>Needs a login. Safe to screen-share with a customer. Please do not send the link to anyone outside the team.</div>
 <main>
-  <h1>What WhatsApp costs: ${esc(u.name)}</h1>
-  <p class="lead">${esc(u.biz)} starts with a ${W} who writes first. This page shows, message by message, who pays what, using the same chat as the demo.</p>
-  <p class="checked">Meta prices checked ${esc(PRICING.checked)}. Meta charges in US dollars, so rand amounts use an exchange rate you can change below. Prices exclude VAT and exclude S10U’s own fees (not published: we quote those once S10U confirms). ⚠ marks anything we could not confirm on Meta’s own pages.</p>
+  <h1>What WhatsApp costs: Aesthetic Clinic: Support</h1>
+  <p class="lead">Glow Aesthetic Clinic starts with a client who writes first. This page shows, message by message, who pays what, using the same chat as the demo.</p>
+  <p class="checked">Meta prices checked 8 October 2026. Meta charges in US dollars, so rand amounts use an exchange rate you can change below. Prices exclude VAT and exclude S10U’s own fees (not published: we quote those once S10U confirms). ⚠ marks anything we could not confirm on Meta’s own pages.</p>
 
   <h2>The short answer</h2>
   <div class="grid4">
-    <div class="big free"><div class="n">Free</div><div class="t">Messages the ${W} sends</div><p>Meta never charges for a message a person sends to a business. In this chat that is ${nPerson} messages.</p></div>
-    <div class="big"><div class="n" id="s-svc">R0.15</div><div class="t">Each bot reply inside 24 hours</div><p>A “service message”. Meta started charging for these on 1 October 2026. The ${B} pays, not the ${W}. ${nService} in this chat.</p></div>
-    <div class="big"><div class="n" id="s-utl">R0.15</div><div class="t">Each reminder template</div><p>A message the ${B} starts after the 24 hours have ended, such as ${cfg.templateExample}. Always a template that Meta approved.</p></div>
-    <div class="big warn"><div class="n" id="s-tot">R3.05</div><div class="t">One whole ${U}</div><p>${esc(cfg.journeyText)}: ${nBot} bot messages. Meta fees only.</p></div>
+    <div class="big free"><div class="n">Free</div><div class="t">Messages the client sends</div><p>Meta never charges for a message a person sends to a business. In this chat that is 9 messages.</p></div>
+    <div class="big"><div class="n" id="s-svc">R0.15</div><div class="t">Each bot reply inside 24 hours</div><p>A “service message”. Meta started charging for these on 1 October 2026. The clinic pays, not the client. 11 in this chat.</p></div>
+    <div class="big"><div class="n" id="s-utl">R0.15</div><div class="t">Each reminder template</div><p>A message the clinic starts after the 24 hours have ended, such as a doctor’s answer after the window closed. Always a template that Meta approved.</p></div>
+    <div class="big warn"><div class="n" id="s-tot">R3.05</div><div class="t">One whole support chat</div><p>Appointment lookup, a care-protocol PDF, FAQ answers, doctor-approved answers, a question for the doctor and an urgent hand-over to reception: 11 bot messages. Meta fees only.</p></div>
   </div>
 
   <h2>Who pays what</h2>
   <div class="card"><table>
     <tr><th>What happens</th><th>Who pays</th><th>How much (Meta list price)</th></tr>
-    <tr><td>The ${W} sends a message</td><td><span class="badge b-free">Nobody</span></td><td>Free. The ${W} also pays nothing extra, apart from normal data use on their phone.</td></tr>
-    <tr><td>The bot replies within 24 hours of the ${W}’s last message</td><td><span class="badge b-service">The ${B}</span></td><td><span class="r-svc"></span> each. Meta reportedly gives 1,000 free per business phone number each month. ⚠</td></tr>
-    <tr><td>The ${B} starts a message after 24 hours (reminder, follow-up)</td><td><span class="badge b-utility">The ${B}</span></td><td>Utility template: <span class="r-utl"></span> each. A marketing template (offers, invitations): <span class="r-mkt"></span> each.</td></tr>
-    <tr><td>The ${W} starts from a Click-to-WhatsApp ad or a Facebook page button</td><td><span class="badge b-free">Nobody</span></td><td>Free for 72 hours: every message type, if the ${B} replies within 24 hours.</td></tr>
-    <tr><td>The platform and the AI (S10U)</td><td><span class="badge b-feedback">The ${B}</span></td><td>Not published. Ask S10U. ⚠</td></tr>
+    <tr><td>The client sends a message</td><td><span class="badge b-free">Nobody</span></td><td>Free. The client also pays nothing extra, apart from normal data use on their phone.</td></tr>
+    <tr><td>The bot replies within 24 hours of the client’s last message</td><td><span class="badge b-service">The clinic</span></td><td><span class="r-svc"></span> each. Meta reportedly gives 1,000 free per business phone number each month. ⚠</td></tr>
+    <tr><td>The clinic starts a message after 24 hours (reminder, follow-up)</td><td><span class="badge b-utility">The clinic</span></td><td>Utility template: <span class="r-utl"></span> each. A marketing template (offers, invitations): <span class="r-mkt"></span> each.</td></tr>
+    <tr><td>The client starts from a Click-to-WhatsApp ad or a Facebook page button</td><td><span class="badge b-free">Nobody</span></td><td>Free for 72 hours: every message type, if the clinic replies within 24 hours.</td></tr>
+    <tr><td>The platform and the AI (S10U)</td><td><span class="badge b-feedback">The clinic</span></td><td>Not published. Ask S10U. ⚠</td></tr>
   </table></div>
 
-  <h2>One ${U}, message by message</h2>
+  <h2>One support chat, message by message</h2>
   <div class="card"><table id="msgs">
     <tr><th class="idx">#</th><th>Message</th><th>Type</th><th class="num usd">USD</th><th class="num">Rand</th></tr>
   </table></div>
-  <div class="note">${esc(cfg.windowNote)}</div>
-  ${cfg.skipNote ? '<div class="note">' + esc(cfg.skipNote) + '</div>' : ''}
-  ${cfg.freeEntry ? '<div class="note" id="adnote" style="background:#D9FDD3;color:#075E54"><b>Started from an ad:</b> Meta does not charge for any message for 72 hours, as long as the ' + B + ' replies within 24 hours (phone app only, not WhatsApp Web). You pay for the ad itself, not for the chat. Switch the source above to see the normal prices.</div>' : ''}
+  <div class="note">The client’s first message opens a 24-hour window, and this whole chat happens in one day inside it. So every reply is a normal reply and no template is needed. The doctor’s answer and the receptionist’s message are typed by people and are charged like other replies. If the doctor answered the next day, after the window closed, that answer would have to be a template. The AI assistant’s own running cost (the AI model) is separate and is not in this table.</div>
+  
+  
 
-  <h2>Monthly cost for the ${B}</h2>
+  <h2>Monthly cost for the clinic</h2>
   <div class="card">
     <div class="controls">
-      <label>${esc(cfg.convLabel || (Uc + 's booked on WhatsApp per month'))}<input type="number" id="conv" value="300" min="1"></label>
-      ${cfg.freeEntry ? '<label>Where does the ' + W + ' start the chat?<select id="src"><option value="ad">From a Facebook or Instagram ad (free for 72 hours)</option><option value="link">From a link, QR code or website button</option></select></label>' : '<input type="hidden" id="src" value="link">'}
-      <label>Rand per US dollar<input type="number" id="fx" value="${PRICING.fx}" step="0.05" min="1"></label>
-      ${nFeedback ? '<label>Feedback request counts as<select id="fbk"><option value="utility">Utility (cheaper)</option><option value="marketing">Marketing (about 4× more)</option></select></label>' : '<input type="hidden" id="fbk" value="utility">'}
+      <label>Support chats on WhatsApp per month<input type="number" id="conv" value="300" min="1"></label>
+      <input type="hidden" id="src" value="link">
+      <label>Rand per US dollar<input type="number" id="fx" value="16.03" step="0.05" min="1"></label>
+      <input type="hidden" id="fbk" value="utility">
       <label class="chk"><input type="checkbox" id="alw"> Include the 1,000 free service messages a month ⚠ (not confirmed on Meta’s page)</label>
       <label class="chk"><input type="checkbox" id="vat"> Add 15% VAT</label>
     </div>
     <div class="result">
       <div class="r hi"><b id="m-zar">R0</b><span>Meta fees per month</span></div>
-      <div class="r"><b id="m-per">R0</b><span>Meta fees per ${U}</span></div>
+      <div class="r"><b id="m-per">R0</b><span>Meta fees per support chat</span></div>
       <div class="r"><b id="m-usd">$0</b><span>Meta fees per month in US dollars</span></div>
     </div>
     <div class="lines" id="m-lines"></div>
-    <div class="note">Plus S10U’s platform fee and any AI usage: not published yet. ⚠ ${esc(cfg.moreCosts || '')} We will add S10U’s fees to this page once S10U confirms its prices.</div>
+    <div class="note">Plus S10U’s platform fee and any AI usage: not published yet. ⚠ The AI model cost and any extra S10U licence fees are separate. We will add S10U’s fees to this page once S10U confirms its prices.</div>
   </div>
 
   <h2>Is it worth it?</h2>
   <div class="card">
-    <p class="lead" style="margin-bottom:12px">${esc(R.lead)}</p>
+    <p class="lead" style="margin-bottom:12px">Every question the assistant answers is one less call or message for reception, and the doctor only sees the questions that need a doctor. Try the clinic’s own numbers. The cost per question and the shares are examples, not facts.</p>
     <div class="controls">
-      <label>${esc(R.feeLabel)}<input type="number" id="fee" value="${R.fee}" min="0"></label>
-      <label>${esc(R.nsLabel)}<input type="number" id="ns" value="${R.nsDefault}" min="0" max="100"></label>
-      <label>${esc(R.redLabel)}<input type="number" id="red" value="${R.redDefault}" min="0" max="100"></label>
+      <label>Cost of one question handled by reception by phone or message (rand) — example<input type="number" id="fee" value="60" min="0"></label>
+      <label>Share of these questions that would otherwise reach reception — example<input type="number" id="ns" value="80" min="0" max="100"></label>
+      <label>Share the assistant answers without a person (appointments, protocols, FAQ, approved answers) — example only<input type="number" id="red" value="50" min="0" max="100"></label>
     </div>
     <div class="result">
-      <div class="r"><b id="v-prev">0</b><span>${esc(R.prevLabel || 'no-shows prevented per month')}</span></div>
-      <div class="r hi"><b id="v-val">R0</b><span>${esc(R.valueLabel)}</span></div>
+      <div class="r"><b id="v-prev">0</b><span>questions the assistant handles per month</span></div>
+      <div class="r hi"><b id="v-val">R0</b><span>reception time saved per month</span></div>
       <div class="r"><b id="v-cost">0%</b><span>of that value goes to Meta fees</span></div>
     </div>
-    <div class="note">${esc(R.note)}</div>
+    <div class="note">The 50% is a placeholder for the clinic to replace. ⚠ Not counted: the AI model cost, the doctor’s time, and fewer missed questions outside office hours.</div>
   </div>
 
-  <h2>Meta’s rules that matter to a ${B}</h2>
+  <h2>Meta’s rules that matter to a clinic</h2>
   <div class="two">
-    <div class="item"><b>${cap(Ws)} must opt in</b><p>The booking chat starts with the ${W}, so that is clear permission. For reminders and follow-ups, say so when they book and make “stop” easy.</p></div>
-    <div class="item"><b>The 24-hour window</b><p>After a ${W} writes, the bot can reply freely for 24 hours. After that, only approved templates can be sent. Each new message from the ${W} opens a fresh 24 hours.</p></div>
+    <div class="item"><b>Clients must opt in</b><p>The booking chat starts with the client, so that is clear permission. For reminders and follow-ups, say so when they book and make “stop” easy.</p></div>
+    <div class="item"><b>The 24-hour window</b><p>After a client writes, the bot can reply freely for 24 hours. After that, only approved templates can be sent. Each new message from the client opens a fresh 24 hours.</p></div>
     <div class="item"><b>Templates need Meta’s approval</b><p>Reminders are “utility” templates. Offers, invitations and promotions are “marketing” and cost more. A survey or a welcome message may be reviewed as either. ⚠</p></div>
     <div class="item"><b>Rules for AI bots</b><p>A bot built for one business’s customer service is allowed. Meta does not allow a general-purpose AI assistant to be the main product on its platform. Chat data cannot be used to train general AI models.</p></div>
-    <div class="item"><b>Quality and sending limits</b><p>If many ${Ws} block or report the number, Meta can lower its limits. A new number starts at 250 ${Ws} a day outside the window. Business verification lifts that to 2,000 and beyond.</p></div>
+    <div class="item"><b>Quality and sending limits</b><p>If many clients block or report the number, Meta can lower its limits. A new number starts at 250 clients a day outside the window. Business verification lifts that to 2,000 and beyond.</p></div>
     <div class="item"><b>Prices can change</b><p>Meta bills in US dollars and may update rates up to quarterly. Utility and authentication get cheaper with volume. Service replies and marketing do not. Meta’s own AI agent (“Meta Business Agent”) is charged by tokens from 1 August 2026: ask S10U whether its bot uses it. ⚠</p></div>
   </div>
 
-  <h2>${esc(cfg.privacyTitle)}</h2>
-  <div class="card"><ul class="tips">${cfg.privacy.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+  <h2>Health information (POPIA)</h2>
+  <div class="card"><ul class="tips"><li>Health and treatment records are special personal information. The assistant sends only content the clinic and the doctor have approved. It gives no clinical advice of its own and it hands over to a person when unsure.</li><li>The clinic is the responsible party. S10U, the AI provider and Meta are operators and need written agreements. Overseas AI is a cross-border transfer: tell clients.</li><li>Care-protocol PDFs and photos sent in chat are health information. Send them only to the right client, keep a “stop” option, and get legal sign-off before going live. This is not legal advice.</li></ul></div>
 
   <h2>Ways to keep the cost low</h2>
   <div class="card"><ul class="tips">
-    <li><b>${esc(cfg.startTip.split('. ')[0])}.</b> ${esc(cfg.startTip.split('. ').slice(1).join('. '))}</li>
+    <li><b>Start with My Appointments and the care-protocol PDF.</b> They are the most common questions and they are normal replies inside the window.</li>
     <li><b>Use buttons and short answers.</b> Every bot reply is a separate charge, so fewer, clearer messages cost less.</li>
-    <li><b>Let ${Ws} start the chat.</b> Their messages are free and open the free 24-hour window. Ads that open WhatsApp give 72 free hours.</li>
+    <li><b>Let clients start the chat.</b> Their messages are free and open the free 24-hour window. Ads that open WhatsApp give 72 free hours.</li>
     <li><b>Keep marketing separate.</b> Offers and invitations cost about four times a reminder. Do not mix them into reminders.</li>
-    <li><b>Check the monthly Meta report.</b> We watch the cost per ${U} so nothing surprises the ${B}.</li>
+    <li><b>Check the monthly Meta report.</b> We watch the cost per support chat so nothing surprises the clinic.</li>
   </ul></div>
 
   <h2>Questions the customer may ask</h2>
-  <details><summary>Do we pay when the ${W} messages us?</summary><p>No. Meta never charges for messages a person sends to a business.</p></details>
+  <details><summary>Do we pay when the client messages us?</summary><p>No. Meta never charges for messages a person sends to a business.</p></details>
   <details><summary>Do we pay for the bot’s replies?</summary><p>Yes, since 1 October 2026. Each reply inside the 24-hour window is a service message, about <span class="r-svc"></span> at Meta’s list price. Meta reportedly gives 1,000 free each month for every business number. ⚠ Until the end of September 2026 they were free, so older articles and quotes may say “free replies”.</p></details>
-  <details><summary>Does the ${W} pay anything?</summary><p>No fee from us or from Meta. They use WhatsApp as normal, with their usual data or Wi-Fi.</p></details>
+  <details><summary>Does the client pay anything?</summary><p>No fee from us or from Meta. They use WhatsApp as normal, with their usual data or Wi-Fi.</p></details>
   <details><summary>Why not use the free WhatsApp Business app?</summary><p>The app is free but manual: someone must answer every message on a phone. It cannot run an AI assistant, book into your system, send automatic reminders or share one inbox between staff. These Meta fees apply only to the automated platform.</p></details>
   <details><summary>What if we get busier?</summary><p>Cost grows with each message, in a straight line. Use the calculator above with the busier number. Utility reminders get cheaper at high volume.</p></details>
-  <details><summary>Will the price change?</summary><p>Meta can change rates up to quarterly and bills in US dollars, so the rand cost also moves with the exchange rate. We check the rates every month and will tell the ${B}.</p></details>
+  <details><summary>Will the price change?</summary><p>Meta can change rates up to quarterly and bills in US dollars, so the rand cost also moves with the exchange rate. We check the rates every month and will tell the clinic.</p></details>
   <details><summary>What does the platform cost on top?</summary><p>S10U’s own fee is not published. We will give a full quote once S10U confirms it. ⚠</p></details>
-  <details><summary>Who sends the invoice?</summary><p>Not yet confirmed: Meta may bill the ${B} directly in US dollars, or S10U may bill in rand, possibly with a mark-up. Ask S10U. ⚠</p></details>
+  <details><summary>Who sends the invoice?</summary><p>Not yet confirmed: Meta may bill the clinic directly in US dollars, or S10U may bill in rand, possibly with a mark-up. Ask S10U. ⚠</p></details>
 
   <h2>How to use this in a meeting</h2>
   <div class="card"><ul class="tips">
-    <li>Show “One ${U}, message by message” first: it is easy to follow and builds trust.</li>
-    <li>Type the ${B}’s own numbers into the two calculators. Compare Meta’s fee per ${U} with ${esc(R.meetingLine)}.</li>
+    <li>Show “One support chat, message by message” first: it is easy to follow and builds trust.</li>
+    <li>Type the clinic’s own numbers into the two calculators. Compare Meta’s fee per support chat with what one reception-handled question costs the clinic.</li>
     <li>Offer a 30-day pilot with reminders first, then the booking chat.</li>
     <li>Be open about what is not yet confirmed (S10U’s fee, the free allowance, invoicing). Honest answers close better.</li>
   </ul></div>
 
-  <footer>Sources: ${PRICING.sources.map(([t, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(t)}</a>`).join('; ')}. South African rates ($${PRICING.rates.marketing} marketing, $${PRICING.rates.utility} utility, authentication and service) come from articles that cite Meta’s rate card: download Meta’s USD rate card to confirm before quoting. Exchange rate R${PRICING.fx} per US dollar (3 September 2026).</footer>
+  <footer>Sources: <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing" target="_blank" rel="noopener">Meta: pricing on the WhatsApp Business Platform</a>; <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/non-template-messages" target="_blank" rel="noopener">Meta: upcoming pricing updates for service and utility messages</a>; <a href="https://a2ztech.co.za/insights/a2z-insights-whatsapp-business-pricing-public-facing" target="_blank" rel="noopener">a2z Tech: WhatsApp Business pricing changes for South Africa (3 Sept 2026)</a>; <a href="https://mybroadband.co.za/news/business/662921-big-change-coming-for-whatsapp-business-in-south-africa-where-every-reply-will-cost-12-cents.html" target="_blank" rel="noopener">MyBroadband: every reply will cost 12 cents (19 Aug 2026, older figures)</a>. South African rates ($0.0379 marketing, $0.0095 utility, authentication and service) come from articles that cite Meta’s rate card: download Meta’s USD rate card to confirm before quoting. Exchange rate R16.03 per US dollar (3 September 2026).</footer>
 </main>
 <script>
-const D = ${JSON.stringify(DATA)};
+const D = {"rows":[{"step":"Open the chat","who":"person","text":"Hi, I have a few questions","type":"free"},{"step":"Open the chat","who":"bot","text":"Hi Naledi 👋 Welcome to Glow Aesthetic Clinic ✨ I’m the clinic’s assistant. What do you need?","type":"service","label":""},{"step":"My appointments","who":"person","text":"When is my next appointment?","type":"free"},{"step":"My appointments","who":"bot","text":"Your next appointmentWithThandi Mokoena | WhenFri 20/11/2026, 11:00 | Where12 Kloof Street, G…","type":"service","label":""},{"step":"Care protocol (PDF)","who":"person","text":"How do I use my serum?","type":"free"},{"step":"Care protocol (PDF)","who":"bot","text":"From your file: Hydrating Facial and Vitamin C serum (04/11/2026, with Thandi). Here is your …","type":"service","label":""},{"step":"Care protocol (PDF)","who":"bot","text":"📄 Care-protocol_Hydrating-Facial.pdf 2 pages · made for Naledi Khumalo","type":"service","label":""},{"step":"Clinic question","who":"person","text":"What are your Saturday hours? Is there parking?","type":"free"},{"step":"Clinic question","who":"bot","text":"Saturday: 08:30 to 13:00. Free parking in the Kloof Street garage next door 🚗 Source: clinic…","type":"service","label":""},{"step":"Doctor-approved answer","who":"person","text":"Can I use the Vitamin C serum with my retinol?","type":"free"},{"step":"Doctor-approved answer","who":"bot","text":"Dr Botha’s approved answer Use the Vitamin C serum in the morning and the retinol at night. W…","type":"service","label":""},{"step":"Question for the doctor","who":"person","text":"Can I book a peel in the same week as my laser session?","type":"free"},{"step":"Question for the doctor","who":"bot","text":"That one needs Dr Botha. I don’t want to guess ✋ I’ve added your question to her list. She an…","type":"service","label":""},{"step":"Question for the doctor","who":"person","text":"That’s fine","type":"free"},{"step":"Question for the doctor","who":"bot","text":"Great. I’ll message you here as soon as she answers.","type":"service","label":""},{"step":"Doctor answers","who":"agent","text":"👩‍⚕️ Dr Botha answered your question “Let’s plan the timing together. I’ve noted it on your …","type":"service","label":""},{"step":"Doctor answers","who":"person","text":"Thank you!","type":"free"},{"step":"Urgent: reception","who":"person","text":"My skin is very red and swollen after my treatment","type":"free"},{"step":"Urgent: reception","who":"bot","text":"I’m sorry to hear that. I’m passing this to our receptionist right now 📞 If this is an emerg…","type":"service","label":""},{"step":"Urgent: reception","who":"agent","text":"Hi Naledi, it’s Zanele from reception. Can you send me a photo? I’m showing Dr Botha now.","type":"service","label":""}],"rates":{"marketing":0.0379,"utility":0.0095,"authentication":0.0095,"service":0.0095,"authenticationInternational":0.02},"fx":16.03,"free":1000,"vat":0.15,"nService":11,"nUtility":0,"nFeedback":0,"nMarketing":0,"Who":"Client","unit":"support chat","freeEntry":false,"replyLabel":"Bot, doctor and receptionist replies","units":1,"roiMode":"product"};
 const $ = id => document.getElementById(id);
-const zar = n => 'R' + n.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ' ');
+const zar = n => 'R' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const usd = n => '$' + n.toFixed(4);
 const num = id => Math.max(0, parseFloat($(id).value) || 0);
 const fbRate = () => $('fbk').value === 'marketing' ? D.rates.marketing : D.rates.utility;
@@ -283,29 +230,3 @@ render();
 </script>
 </body>
 </html>
-`;
-};
-
-for (const u of USECASES) {
-  const cfg = COSTS[u.slug];
-  if (!cfg) continue;
-  fs.writeFileSync(ROOT + `uc/${u.slug}/cost.html`, pageFor(u, cfg));
-  console.log('built cost card for', u.slug);
-}
-
-// The aesthetic clinic journeys also get a small JSON file with the final cost of one conversation.
-// It sits under /uc/<slug>/, so it needs a login like the cost card: only logged-in viewers see the cost at the bottom of the journey pages.
-for (const j of CLINIC.journeys) {
-  const cfg = COSTS[j.slug];
-  const rows = rowsFor(j.slug, cfg);
-  const usdOf = r => r.type === 'free' ? 0 : r.type === 'service' ? PRICING.rates.service : r.type === 'marketing' ? PRICING.rates.marketing : PRICING.rates.utility;
-  const botRows = rows.filter(r => r.who !== 'person');
-  const usd = botRows.reduce((n, r) => n + usdOf(r), 0);
-  const summary = {
-    slug: j.slug, unit: j.unit, fx: PRICING.fx, checked: PRICING.checked,
-    messages: botRows.length, templates: botRows.filter(r => r.type === 'utility' || r.type === 'marketing' || r.type === 'feedback').length,
-    usd: Math.round(usd * 10000) / 10000, zar: Math.round(usd * PRICING.fx * 100) / 100,
-  };
-  fs.writeFileSync(ROOT + `uc/${j.slug}/cost-summary.json`, JSON.stringify(summary, null, 1) + '\n');
-  console.log('built cost summary for', j.slug, 'R' + summary.zar.toFixed(2));
-}

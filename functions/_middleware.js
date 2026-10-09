@@ -3,6 +3,8 @@ import { getSession } from './_auth.js';
 
 const PUBLIC = new Set([
   '/login', '/logout', '/invite', '/api/accept-invite', '/api/me', '/favicon.png',
+  // Aesthetic clinic: the landing page, the proposal form and its API are public so a clinic can use them without a login.
+  '/uc/aesthetic-clinic', '/uc/aesthetic-clinic/index.html', '/uc/aesthetic-clinic/proposal', '/uc/aesthetic-clinic/proposal.html', '/api/proposal',
 ]);
 // Every use case's live chat demos (chat and dashboard-chat) are public so they can be shared with customers.
 const CHAT_RE = /^\/uc\/[a-z0-9-]+\/(chat|dashboard-chat)(\.html)?$/;

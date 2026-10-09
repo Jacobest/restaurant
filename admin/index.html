@@ -53,6 +53,7 @@
 
   <div class="box"><h2>Pending invites</h2><div id="invites"></div></div>
   <div class="box"><h2>Team</h2><div id="users"></div></div>
+  <div class="box"><h2>Proposal requests</h2><div id="props"></div></div>
 </main>
 <script>
 const $ = id => document.getElementById(id);
@@ -74,12 +75,25 @@ $('inv').onsubmit = async e => {
   $('email').value = ''; load();
 };
 document.addEventListener('click', async e => {
-  const b = e.target.closest('button.del'); if (!b) return;
+  const b = e.target.closest('button.del'); if (!b || b.dataset.prop) return;
   if (b.dataset.user && !confirm('Remove ' + b.dataset.user + '? They lose access now.')) return;
   await fetch('/api/admin/team?' + (b.dataset.user ? 'email=' + encodeURIComponent(b.dataset.user) : 'invite=' + b.dataset.inv), { method: 'DELETE' });
   load();
 });
+async function loadProps() {
+  const r = await fetch('/api/admin/proposals'); const d = await r.json();
+  if (!r.ok) { $('props').innerHTML = `<div class="err">${esc(d.error || 'Could not load.')}</div>`; return; }
+  const when = t => new Date(t).toLocaleString();
+  $('props').innerHTML = d.items.length ? d.items.map(p => `<div class="row"><div><b>${esc(p.clinic)}</b> · ${esc(p.name)}<small>${esc(p.cell)} · ${esc(p.email)}</small><small>Wants: ${esc((p.journeys || []).join(', ') || 'not said')} · ${when(p.created)}</small>${p.note ? '<small>' + esc(p.note) + '</small>' : ''}</div><button class="del" data-prop="${esc(p.id)}">Remove</button></div>`).join('') : '<div class="empty">No requests yet.</div>';
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('button[data-prop]'); if (!b) return;
+  if (!confirm('Remove this request?')) return;
+  await fetch('/api/admin/proposals?id=' + encodeURIComponent(b.dataset.prop), { method: 'DELETE' });
+  loadProps();
+});
 load();
+loadProps();
 </script>
 </body>
 </html>
